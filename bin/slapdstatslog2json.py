@@ -343,9 +343,7 @@ def main(argv):
                 c.op_start(line_n, 'MODIFY', {'dn': m.group('dn')})
 
             elif chunk.startswith('MOD attr='):
-                c['op_request'].update({
-                    'attrs': chunk[9:].split(' '),
-                })
+                c.op_request['attrs'] = chunk[9:].split(' ')
 
             elif chunk.startswith('MODRDN dn="'):
                 c.op_start(line_n, 'MODIFYRDN', {'dn': chunk[11:-1]})
@@ -368,10 +366,10 @@ def main(argv):
             ## FIXME: Support CANCEL CMP WHOAMI PROXYAUTHZ DENIED EXT
 
             else:
-                logger.error(f'Unknown format: {line_n}: {line}')
+                logger.error(f'Unknown line: {line_n}: {line}')
 
         else:
-            logger.error(f'Unknown format: {line_n}: {line}')
+            logger.error(f'Unknown line: {line_n}: {line}')
 
         if c.op_result:
             print(json.dumps(c, indent=2))
