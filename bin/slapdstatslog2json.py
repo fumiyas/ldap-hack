@@ -121,9 +121,17 @@ re_search_base = re.compile(
     '$'
 )
 
+re_modify_dn = re.compile(
+    r'MOD'
+    r' dn="(?P<dn>[^"]*)"'
+    '$'
+)
+
+
 re_result = re.compile(
     r'RESULT'
-    r' tag=(?P<tag>\d+)'
+    r'( tag=(?P<tag>\d+))?'
+    r'( oid=(?P<oid>\W*))?'
     r' err=(?P<error>\d+)'
     r' text=(?P<text>.*)'
     '$'
@@ -199,12 +207,16 @@ def main(argv):
                     continue
                 c['op_result'] = {
                     'line_n': line_n,
-                    'tag': int(m.group('tag')),
                     'text': m.group('text'),
-                    'error': int(m.group('error')),
                 }
-                if c['op_type'] == 'BIND' and c['op_result']['error'] == 0:
+                error = int(m.group('error'))
+                if m.group('tag') is not None:
+                    c['op_result']['tag'] = int(m.group('tag'))
+                if m.group('oid') is not None:
+                    c['op_result']['oid'] = m.group('oid')
+                if c['op_type'] == 'BIND' and error == 0:
                     c['dn'] = c['op_request']['dn']
+                c['op_result']['error'] = error
             elif chunk.startswith('SEARCH RESULT '):
                 c['op'] = op
                 m = re_search_result.match(chunk)
@@ -277,8 +289,48 @@ def main(argv):
                 c['op_request'].update({
                     'attrs': chunk[10:].split(' '),
                 })
-            ## FIXME: ADD MOD MODRDN PASSMOD DEL
-            ## FIXME: ABANDON TLS STARTTLS CANCEL CMP WHOAMI PROXYAUTHZ DENIED EXT
+            elif chunk.startswith('ADD dn="'):
+                c['op_type'] = 'ADD'
+                c['op_request'].update({
+                    'dn': chunk[8:-1],
+                })
+            elif chunk.startswith('DEL dn="'):
+                c['op_type'] = 'DELETE'
+                c['op_request'].update({
+                    'dn': chunk[8:-1],
+                })
+            elif chunk.startswith('MOD dn='):
+                m = re_modify_dn.match(chunk)
+                if m is None:
+                    logger.error(f'Invalid `MOD dn=` line: {line_n}: {line}')
+                    continue
+                c['op_type'] = 'MODIFY'
+                c['op_request'].update({
+                    'line_n': line_n,
+                    'dn': m.group('dn'),
+                })
+            elif chunk.startswith('MOD attr='):
+                c['op_request'].update({
+                    'attrs': chunk[9:].split(' '),
+                })
+            elif chunk.startswith('MODRDN dn="'):
+                c['op_type'] = 'MODIFYRDN'
+                c['op_request'].update({
+                    'dn': chunk[11:-1],
+                })
+            elif chunk.startswith('PASSMOD'):
+                c['op_type'] = 'PASSWORD'
+                if chunk.startswith('PASSMOD id="'):
+                    rq_index = chunk.rfind('"')
+                    c['op_request']['dn'] = dn = chunk[12:rq_index]
+                    chunk = chunk[rq_index+1:]
+                ## New password is supplied
+                c['op_request']['new'] = (chunk.find(' new') >= 0)
+                ## Old password is supplied
+                c['op_request']['old'] = (chunk.find(' old') >= 0)
+            elif chunk.startswith('ABANDON msg='): ## FIXME
+                pass
+            ## FIXME: ADD TLS STARTTLS CANCEL CMP WHOAMI PROXYAUTHZ DENIED EXT
             else:
                 logger.error(f'Unknown format: {line_n}: {line}')
         else:
