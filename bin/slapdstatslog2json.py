@@ -309,7 +309,9 @@ def main(argv):
                     continue
 
             elif chunk == 'UNBIND':
+                c.op_start(line_n, 'UNBIND', {'dn': c['dn']})
                 c['dn'] = 'UNBOUND'
+                c.op_end(line_n, 0)
 
             elif chunk.startswith('SRCH base='):
                 m = re_search_base.match(chunk)
