@@ -155,8 +155,29 @@ class Conn(dict):
             'dn': 'UNKNOWN',
             'op': -1,
             'op_type': 'UNKNOWN',
-            'op_request': {},
         })
+        self.op_request = self.op_result = None
+
+    def op_start(self, line_n, op_type, req={}):
+        self['op_type'] = op_type
+        self['op_request'] = self.op_request = {
+            'line_n': line_n,
+            **req,
+        }
+
+    def op_end(self, line_n, error, res={}):
+        self.op_result = self['op_result'] = {
+            'line_n': line_n,
+            'error': error,
+            'error_text': error_text_by_n.get(error, 'UNKNOWN'),
+            **res,
+        }
+
+
+    def op_reset(self):
+        self['op_resuest'] = self.op_request= {}
+        del(self['op_result'])
+        self.op_result= None
 
 
 def main(argv):
@@ -171,12 +192,13 @@ def main(argv):
 
         conn = int(m.group('conn'))
         chunk = m.group('chunk')
-        c = {}
+        c = conns[conn] if conn in conns else Conn(conn=conn)
 
         if m.group('what') == 'fd':
             fd = int(m.group('id'))
             if chunk.startswith('ACCEPT from '):
-                c = conns[conn] = Conn(conn=conn, fd=fd)
+                ## FIXME: Check if conn is already exists
+                c['fd'] = fd
 
                 chunks = chunk.split(' ')
                 if chunks[2].startswith('IP='):
@@ -185,7 +207,18 @@ def main(argv):
                     c['source'] = chunks[2][5:]
                 else:
                     logger.error(f'Unknown `ACCEPT` line: {line_n}: {line}')
+                c.op_start(line_n, 'CONNECT')
+                c.op_end(line_n, 0)
+            elif chunk.startswith('TLS '):
+                pass ## FIXME
             elif chunk.startswith('closed'):
+                c.op_start(line_n, 'DISCONNECT')
+                res = {}
+                try:
+                    res['text'] = chunk[chunk.index('(')+1:-1]
+                except ValueError:
+                    pass
+                c.op_end(line_n, 0, res)
                 try:
                     del(conns[conn])
                 except KeyError:
@@ -196,50 +229,54 @@ def main(argv):
                 continue
         elif m.group('what') == 'op':
             op = int(m.group('id'))
+
             if conn not in conns:
                 conns[conn] = Conn(conn=conn)
             c = conns[conn]
+
             if chunk.startswith('RESULT '):
                 c['op'] = op
                 m = re_result.match(chunk)
                 if m is None:
                     logger.error(f'Invalid `RESULT` line: {line_n}: {line}')
                     continue
-                c['op_result'] = {
-                    'line_n': line_n,
+                error = int(m.group('error'))
+                res = {
                     'text': m.group('text'),
                 }
-                error = int(m.group('error'))
                 if m.group('tag') is not None:
-                    c['op_result']['tag'] = int(m.group('tag'))
+                    res['tag'] = int(m.group('tag'))
                 if m.group('oid') is not None:
-                    c['op_result']['oid'] = m.group('oid')
+                    res['oid'] = m.group('oid')
+                c.op_end(line_n, error, res)
+
                 if c['op_type'] == 'BIND' and error == 0:
-                    c['dn'] = c['op_request']['dn']
-                c['op_result']['error'] = error
+                    c['dn'] = c.op_request['dn']
+
             elif chunk.startswith('SEARCH RESULT '):
                 c['op'] = op
                 m = re_search_result.match(chunk)
                 if m is None:
                     logger.error(f'Invalid `SEARCH RESULT` line: {line_n}: {line}')
                     continue
-                error = int(m.group('error'))
-                c['op_result'] = {
-                    'line_n': line_n,
-                    'tag': int(m.group('tag')),
+                res = {
                     'nentries': int(m.group('nentries')),
+                    'tag': int(m.group('tag')),
                     'text': m.group('text'),
-                    'error': error,
                 }
+                c.op_end(line_n, int(m.group('error')), res)
+
+            elif chunk == 'STARTTLS':
+                c.op_start(line_n, 'STARTTLS')
+
             elif chunk.startswith('BIND '):
                 if chunk.find(' method=') > 0:
                     m = re_bind_method.match(chunk)
                     if m is None:
                         logger.error(f'Invalid `BIND method=` line: {line_n}: {line}')
                         continue
-                    c['op_type'] = 'BIND'
-                    c['op_request'].update({
-                        'line_n': line_n,
+                    c.op_start(line_n, 'BIND')
+                    c.op_request.update({
                         'dn': m.group('dn'),
                         'method': method_by_n[int(m.group('method_n'))],
                     })
@@ -249,98 +286,94 @@ def main(argv):
                         logger.error(f'Invalid `BIND mech=` line: {line_n}: {line}')
                         continue
                     if 'dn' in m.groupdict():
-                        c['op_request']['dn'] = m.group('dn')
+                        c.op_request['dn'] = m.group('dn')
                     else:
-                        c['op_request']['dn'] = 'anonymous'
-                    c['op_request'].update({
+                        c.op_request['dn'] = 'anonymous'
+                    c.op_request.update({
                         'mech': m.group('mech'),
                         'ssf': int(m.group('ssf')),
                     })
                     if 'sasl_ssf' in m.groupdict():
-                        c['op_request']['sasl_ssf'] = m.group('sasl_ssf')
+                        c.op_request['sasl_ssf'] = m.group('sasl_ssf')
                 elif chunk.find(' authcid=') > 0:
                     m = re_bind_authcid.match(chunk)
                     if m is None:
                         logger.error(f'Invalid `BIND authcid=` line: {line_n}: {line}')
                         continue
-                    c['op_request'].update({
+                    c.op_request.update({
                         'authcid': m.group('authcid'),
                         'authzid': m.group('authzid'),
                     })
                 else:
                     logger.error(f'Invalid `BIND` line: {line_n}: {line}')
                     continue
+
             elif chunk == 'UNBIND':
                 c['dn'] = 'UNBOUND'
+
             elif chunk.startswith('SRCH base='):
                 m = re_search_base.match(chunk)
                 if m is None:
                     logger.error(f'Invalid `SEARCH base=` line: {line_n}: {line}')
                     continue
-                c['op_type'] = 'SEARCH'
-                c['op_request'].update({
-                    'line_n': line_n,
+                c.op_start(line_n, 'SEARCH')
+                c.op_request.update({
                     'base': m.group('base'),
                     'scope': scope_by_n.get(int(m.group('scope_n'))),
                     'deref': deref_by_n.get(int(m.group('deref_n'))),
                     'filter': m.group('filter'),
                 })
+
             elif chunk.startswith('SRCH attr='):
-                c['op_request'].update({
-                    'attrs': chunk[10:].split(' '),
-                })
+                c.op_request['attrs'] = chunk[10:].split(' ')
+
             elif chunk.startswith('ADD dn="'):
-                c['op_type'] = 'ADD'
-                c['op_request'].update({
-                    'dn': chunk[8:-1],
-                })
+                c.op_start(line_n, 'ADD', {'dn': chunk[8:-1]})
+
             elif chunk.startswith('DEL dn="'):
-                c['op_type'] = 'DELETE'
-                c['op_request'].update({
-                    'dn': chunk[8:-1],
-                })
+                c.op_start(line_n, 'DELETE', {'dn': chunk[8:-1]})
+
             elif chunk.startswith('MOD dn='):
                 m = re_modify_dn.match(chunk)
                 if m is None:
                     logger.error(f'Invalid `MOD dn=` line: {line_n}: {line}')
                     continue
-                c['op_type'] = 'MODIFY'
-                c['op_request'].update({
-                    'line_n': line_n,
-                    'dn': m.group('dn'),
-                })
+                c.op_start(line_n, 'MODIFY', {'dn': m.group('dn')})
+
             elif chunk.startswith('MOD attr='):
                 c['op_request'].update({
                     'attrs': chunk[9:].split(' '),
                 })
+
             elif chunk.startswith('MODRDN dn="'):
-                c['op_type'] = 'MODIFYRDN'
-                c['op_request'].update({
-                    'dn': chunk[11:-1],
-                })
+                c.op_start(line_n, 'MODIFYRDN', {'dn': chunk[11:-1]})
+
             elif chunk.startswith('PASSMOD'):
-                c['op_type'] = 'PASSWORD'
+                req = {}
                 if chunk.startswith('PASSMOD id="'):
                     rq_index = chunk.rfind('"')
-                    c['op_request']['dn'] = dn = chunk[12:rq_index]
+                    req['dn'] = dn = chunk[12:rq_index]
                     chunk = chunk[rq_index+1:]
                 ## New password is supplied
-                c['op_request']['new'] = (chunk.find(' new') >= 0)
+                req['new'] = (chunk.find(' new') >= 0)
                 ## Old password is supplied
-                c['op_request']['old'] = (chunk.find(' old') >= 0)
+                req['old'] = (chunk.find(' old') >= 0)
+                c.op_start(line_n, 'PASSWORD', req)
+
             elif chunk.startswith('ABANDON msg='): ## FIXME
                 pass
-            ## FIXME: ADD TLS STARTTLS CANCEL CMP WHOAMI PROXYAUTHZ DENIED EXT
+
+            ## FIXME: Support CANCEL CMP WHOAMI PROXYAUTHZ DENIED EXT
+
             else:
                 logger.error(f'Unknown format: {line_n}: {line}')
+
         else:
             logger.error(f'Unknown format: {line_n}: {line}')
 
-        if 'op_result' in c:
-            c['op_result']['error_text'] = error_text_by_n.get(c['op_result']['error'], 'UNKNOWN')
+        if c.op_result:
             print(json.dumps(c, indent=2))
-            c['op_request'] = {}
-            del(c['op_result'])
+            c.op_reset
 
     return 0
 
