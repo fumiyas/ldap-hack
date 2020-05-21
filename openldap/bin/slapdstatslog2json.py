@@ -378,6 +378,9 @@ def main(argv):
                 req['old'] = (chunk.find(' old') >= 0)
                 c.op_start(line_n, 'PASSWORD', req)
 
+            elif chunk.startswith('EXT '):
+                ## FIXME: conn=100931 op=0 EXT oid=1.3.6.1.4.1.1466.20037 (TLS)
+                pass
             elif chunk.startswith('ABANDON msg='): ## FIXME
                 pass
 
