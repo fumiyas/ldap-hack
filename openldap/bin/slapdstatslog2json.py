@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 ##
-## OpenLDAP: Convert slapd stats log to JSON
-## Copyright (c) SATOH Fumiyasu @ OSS Technology Corp., Japan
+## OpenLDAP: Annotate and Convert slapd stats log to JSON
+## Copyright (c) 2020 SATOH Fumiyasu @ OSS Technology Corp., Japan
 ##
 ## License: GNU General Public License version 3
 ##
@@ -89,7 +89,7 @@ re_line = re.compile(
     r' (?P<what>fd|op)=(?P<id>[0-9]+)'
     r' (?P<chunk>.*)'
     '$'
-    )
+)
 
 re_bind_method = re.compile(
     r'BIND'
@@ -126,7 +126,6 @@ re_modify_dn = re.compile(
     r' dn="(?P<dn>[^"]*)"'
     '$'
 )
-
 
 re_result = re.compile(
     r'RESULT'
