@@ -84,7 +84,7 @@ error_text_by_n = {
     0x50: 'OTHER',
 }
 
-re_line = re.compile(
+re_stats_line = re.compile(
     r'(?P<prefix>.*?): conn=(?P<conn>\d+)'
     r' (?P<what>fd|op)=(?P<id>[0-9]+)'
     r' (?P<chunk>.*)'
@@ -192,7 +192,7 @@ def main(argv):
     for line in sys.stdin:
         line_n += 1
         line = line.rstrip()
-        m = re_line.match(line)
+        m = re_stats_line.match(line)
         if m is None:
             continue
 
