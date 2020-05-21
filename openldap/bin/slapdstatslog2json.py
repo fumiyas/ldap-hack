@@ -12,7 +12,14 @@ import sys
 import re
 import json
 
-logger = logging.getLogger(__name__)
+if __name__ == '__main__':
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(name)s: %(levelname)s: %(message)s',
+    )
+    logger = logging.getLogger(sys.argv[0])
+else:
+    logger = logging.getLogger(__name__)
 
 scope_by_n = {
     0: 'Base',
@@ -402,8 +409,4 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(
-        level=logging.INFO,
-    )
-
     sys.exit(main(sys.argv[1:]))
