@@ -198,7 +198,9 @@ def main(argv):
 
         conn = int(m.group('conn'))
         chunk = m.group('chunk')
-        c = conns[conn] if conn in conns else Conn(conn=conn)
+        if conn not in conns:
+            conns[conn] = Conn(conn=conn)
+        c = conns[conn]
 
         if m.group('what') == 'fd':
             fd = int(m.group('id'))
