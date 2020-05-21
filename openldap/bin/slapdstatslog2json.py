@@ -121,6 +121,13 @@ re_search_base = re.compile(
     '$'
 )
 
+re_cmp = re.compile(
+    r'CMP'
+    r' dn="(?P<dn>[^"]*)"'
+    r' attr="(?P<attr>[^"]*)"'
+    '$'
+)
+
 re_modify_dn = re.compile(
     r'MOD'
     r' dn="(?P<dn>[^"]*)"'
@@ -327,6 +334,18 @@ def main(argv):
 
             elif chunk.startswith('SRCH attr='):
                 c.op_request['attrs'] = chunk[10:].split(' ')
+
+            elif chunk.startswith('CMP '):
+                c.op_request['attrs'] = chunk[10:].split(' ')
+                m = re_cmp.match(chunk)
+                if m is None:
+                    logger.error(f'Invalid `CMP` line: {line_n}: {line}')
+                    continue
+                c.op_start(line_n, 'CMP')
+                c.op_request.update({
+                    'dn': m.group('dn'),
+                    'attr': m.group('attr'),
+                })
 
             elif chunk.startswith('ADD dn="'):
                 c.op_start(line_n, 'ADD', {'dn': chunk[8:-1]})
