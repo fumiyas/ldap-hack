@@ -89,6 +89,39 @@ error_text_by_n = {
     ## Other erros
     0x4C: 'VLV_ERROR',
     0x50: 'OTHER',
+    ## LCUP operation (not implemented in OpenLDAP)
+    0x71: 'CUP_RESOURCES_EXHAUSTED',
+    0x72: 'CUP_SECURITY_VIOLATION',
+    0x73: 'CUP_INVALID_DATA',
+    0x74: 'CUP_UNSUPPORTED_SCHEME',
+    0x75: 'CUP_RELOAD_REQUIRED',
+    ## Cancel operation
+    0x76: 'CANCELLED',
+    0x77: 'NO_SUCH_OPERATION',
+    0x78: 'TOO_LATE',
+    0x79: 'CANNOT_CANCEL',
+    ## Assertion control
+    0x7A: 'ASSERTION_FAILED',
+    ## Proxied Authorization Denied
+    0x7B: 'PROXIED_AUTHORIZATION_DENIED',
+
+    ## Experimental result codes
+    ## LDAP Sync
+    0x1000: 'SYNC_REFRESH_REQUIRED',
+
+    ## Private Use result codes
+    0x4100: 'X_SYNC_REFRESH_REQUIRED',  ## defunct
+    0x410f: 'X_ASSERTION_FAILED',       ## defunct
+    ## LDAP No-Op control
+    0x410e: 'X_NO_OPERATION',
+    ## Chaining Behavior control
+    0x4110: 'X_NO_REFERRALS_FOUND',
+    0x4111: 'X_CANNOT_CHAIN',
+    ## Distributed Procedures
+    0x4112: 'X_INVALIDREFERENCE',
+    ## LDAP Transaction
+    0x4120: 'X_TXN_SPECIFY_OKAY',
+    0x4121: 'X_TXN_ID_INVALID',
 }
 
 re_stats_line = re.compile(
