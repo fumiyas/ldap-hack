@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 ##
 ## OpenLDAP: Annotate and Convert slapd stats log to JSON
-## Copyright (c) 2020 SATOH Fumiyasu @ OSS Technology Corp., Japan
+## Copyright (c) 2020-2021 SATOH Fumiyasu @ OSS Technology Corp., Japan
 ##
 ## License: GNU General Public License version 3
 ##
@@ -436,7 +436,7 @@ def main(argv):
 
         if c.op_result:
             print(json.dumps(c, indent=2))
-            c.op_reset
+            c.op_reset()
 
     return 0
 
