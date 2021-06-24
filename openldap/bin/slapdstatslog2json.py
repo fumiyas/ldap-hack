@@ -221,7 +221,7 @@ class Conn(dict):
 
 
     def op_reset(self):
-        self['op_resuest'] = self.op_request= {}
+        self['op_request'] = self.op_request= {}
         del(self['op_result'])
         self.op_result= None
 
