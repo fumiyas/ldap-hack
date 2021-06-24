@@ -247,6 +247,7 @@ def main(argv):
             if chunk.startswith('ACCEPT from '):
                 ## FIXME: Check if conn is already exists
                 c['fd'] = fd
+                c['dn'] = 'ANONYMOUS'
 
                 chunks = chunk.split(' ')
                 if chunks[2].startswith('IP='):
@@ -336,7 +337,7 @@ def main(argv):
                     if 'dn' in m.groupdict():
                         c.op_request['dn'] = m.group('dn')
                     else:
-                        c.op_request['dn'] = 'anonymous'
+                        c.op_request['dn'] = 'ANONYMOUS'
                     c.op_request.update({
                         'mech': m.group('mech'),
                         'ssf': int(m.group('ssf')),
