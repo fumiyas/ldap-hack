@@ -313,15 +313,12 @@ class Operation():
 
 
     def set_result(self, error, result=None):
-        if result is None:
-            result = {}
-        self.result.update({
-            'line_n': self.conn.line_n,
-            'timestamp': self.conn.timestamp,
-            'error': error,
-            'error_text': error_text_by_n.get(error, 'UNKNOWN'),
-            **result,
-        })
+        self.result['line_n'] = self.conn.line_n
+        self.result['timestamp'] = self.conn.timestamp
+        self.result['error'] = error
+        self.result['error_text'] = error_text_by_n.get(error, 'UNKNOWN')
+        if result is not None:
+            self.result.update(result)
 
 
 def main(argv):
@@ -457,10 +454,8 @@ def main(argv):
                     if m is None:
                         logger.error(f'Invalid `BIND method=` line: {line_n}: {line}')
                         continue
-                    op.request.update({
-                        'dn': m.group('dn'),
-                        'method': bind_method_by_n[int(m.group('method_n'))],
-                    })
+                    op.request['dn'] = m.group('dn')
+                    op.request['method'] = bind_method_by_n[int(m.group('method_n'))]
                 elif chunk.find(' mech=') > 0:
                     m = re_bind_mech.match(chunk)
                     if m is None:
@@ -470,10 +465,8 @@ def main(argv):
                         op.request['dn'] = m.group('dn')
                     else:
                         op.request['dn'] = 'ANONYMOUS'
-                    op.request.update({
-                        'mech': m.group('mech'),
-                        'ssf': int(m.group('ssf')),
-                    })
+                    op.request['mech'] = m.group('mech')
+                    op.request['ssf'] = int(m.group('ssf'))
                     if 'sasl_ssf' in m.groupdict():
                         op.request['sasl_ssf'] = m.group('sasl_ssf')
                 elif chunk.find(' authcid=') > 0:
@@ -481,10 +474,8 @@ def main(argv):
                     if m is None:
                         logger.error(f'Invalid `BIND authcid=` line: {line_n}: {line}')
                         continue
-                    op.request.update({
-                        'authcid': m.group('authcid'),
-                        'authzid': m.group('authzid'),
-                    })
+                    op.request['authcid'] = m.group('authcid')
+                    op.request['authzid'] = m.group('authzid')
                 else:
                     logger.error(f'Invalid `BIND` line: {line_n}: {line}')
                     continue
@@ -497,28 +488,24 @@ def main(argv):
                     logger.error(f'Invalid `SEARCH base=` line: {line_n}: {line}')
                     continue
 
-                op.request.update({
-                    'base': m.group('base'),
-                    'scope': scope_by_n.get(int(m.group('scope_n'))),
-                    'deref': deref_by_n.get(int(m.group('deref_n'))),
-                    'filter': m.group('filter'),
-                })
+                op.request['base'] = m.group('base')
+                op.request['scope'] = scope_by_n.get(int(m.group('scope_n')))
+                op.request['deref'] = deref_by_n.get(int(m.group('deref_n')))
+                op.request['filter'] = m.group('filter')
 
             elif chunk.startswith('SRCH attr='):
                 op.request['attrs'] = chunk[10:].split(' ')
 
             elif chunk.startswith('CMP '):
-                op.type = 'CMP'
+                op.type = 'COMPARE'
 
                 op.request['attrs'] = chunk[10:].split(' ')
                 m = re_cmp.match(chunk)
                 if m is None:
                     logger.error(f'Invalid `CMP` line: {line_n}: {line}')
                     continue
-                op.request.update({
-                    'dn': m.group('dn'),
-                    'attr': m.group('attr'),
-                })
+                op.request['dn'] = m.group('dn')
+                op.request['attr'] = m.group('attr')
 
             elif chunk.startswith('ADD dn="'):
                 op.type = 'ADD'
@@ -542,7 +529,7 @@ def main(argv):
 
             elif chunk.startswith('MODRDN dn="'):
                 op.type = 'MODIFYRDN'
-                op.request.update({'dn': chunk[11:-1]})
+                op.request['dn'] = chunk[11:-1]
 
             elif chunk.startswith('PASSMOD'):
                 op.type = 'PASSWORD'
