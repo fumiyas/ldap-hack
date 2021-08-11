@@ -12,8 +12,10 @@
 import logging
 import sys
 import re
+import datetime
 import json
 import calendar
+import itertools
 
 if __name__ == '__main__':
     logging.basicConfig(
@@ -132,7 +134,7 @@ error_text_by_n = {
 re_stats_line = re.compile(
     r'(?P<month_abbr>[A-Z][a-z][a-z])'
     r' (?P<month_day>[\d ]\d)'
-    r' (?P<time>\d\d:\d\d:\d\d)'
+    r' (?P<time>(?P<hour>\d\d):(?P<minute>\d\d):(?P<second>\d\d))'
     r' (?P<hostname>[\w\-]+)'
     r' [\w\-]+\[(?P<pid>\d+)\]:'
     r' conn=(?P<conn_id>\d+)'
@@ -205,7 +207,7 @@ re_search_result = re.compile(
 class Connection():
     def __init__(self, conn_id):
         self.line_n = None
-        self.timestamp = None
+        self.datetime = None
         self.op_by_id = {}
         self.info = {
             'conn': conn_id,
@@ -290,10 +292,12 @@ class Operation():
         self.conn = conn
         self.id = op_id
         self.type = None
+        self.request_datetime = None
         self.request = {
-            'line_n': conn.line_n,
-            'timestamp': conn.timestamp,
+            'line_n': None,
+            'timestamp': None,
         }
+        self.result_datetime = None
         self.result = {
             'line_n': None,
             'timestamp': None,
@@ -303,18 +307,32 @@ class Operation():
 
 
     def to_json(self, opts={ 'indent': 2 }):
+        if self.request_datetime is None:
+            etime = None
+        else:
+            etime = (self.result_datetime - self.request_datetime).total_seconds()
+
         return json.dumps({
             **self.conn.info,
             'op': self.id,
             'op_type': self.type,
+            'op_etime': etime,
             'op_request': self.request,
             'op_result': self.result,
         }, **opts)
 
 
+    def set_request(self, op_type):
+        self.type = op_type
+        self.request_datetime = self.conn.datetime
+        self.request['line_n'] = self.conn.line_n
+        self.request['timestamp'] = self.request_datetime.isoformat()
+
+
     def set_result(self, error, result=None):
+        self.result_datetime = self.conn.datetime
         self.result['line_n'] = self.conn.line_n
-        self.result['timestamp'] = self.conn.timestamp
+        self.result['timestamp'] = self.result_datetime.isoformat()
         self.result['error'] = error
         self.result['error_text'] = error_text_by_n.get(error, 'UNKNOWN')
         if result is not None:
@@ -322,9 +340,25 @@ class Operation():
 
 
 def main(argv):
+    ## Guess log year (standard syslog has no year in timestamp)
+    dt_now = datetime.datetime.now()
+    year = dt_now.year
+    ## FIXME: Warn and exit if no input
+    firstline = sys.stdin.readline()
+    m = re_stats_line.match(firstline)
+    ## FIXME: Warn and exit if no match
+    month = month_by_abbr[m.group('month_abbr')]
+    mday = int(m.group('month_day'))
+    hour = int(m.group('hour'))
+    minute = int(m.group('minute'))
+    second = int(m.group('second'))
+    dt = datetime.datetime(year, month, mday, hour, minute, second, 0)
+    if dt > dt_now:
+        year = year - 1
+
     conn_by_conn_id = {}
     line_n = 0
-    for line in sys.stdin:
+    for line in itertools.chain([firstline], sys.stdin):
         line_n += 1
         line = line.rstrip()
         m = re_stats_line.match(line)
@@ -332,23 +366,25 @@ def main(argv):
             continue
 
         conn_id = int(m.group('conn_id'))
-
-        month = month_by_abbr[m.group('month_abbr')]
-        mday = int(m.group('month_day'))
-        timestamp = f"{month:02}-{mday:02}T{m.group('time')}"
-        chunk = m.group('chunk')
         if conn_id not in conn_by_conn_id:
             conn_by_conn_id[conn_id] = Connection(conn_id=conn_id)
         conn = conn_by_conn_id[conn_id]
         conn.line_n = line_n
-        conn.timestamp = timestamp
 
+        month = month_by_abbr[m.group('month_abbr')]
+        mday = int(m.group('month_day'))
+        hour = int(m.group('hour'))
+        minute = int(m.group('minute'))
+        second = int(m.group('second'))
+        conn.datetime = datetime.datetime(year, month, mday, hour, minute, second, 0)
+
+        chunk = m.group('chunk')
         if m.group('what') == 'fd':
             fd = int(m.group('id'))
             op = Operation(conn=conn)
 
             if chunk.startswith('ACCEPT from '):
-                op.type = 'CONNECT'
+                op.set_request('CONNECT')
                 ## FIXME: Check if conn_id is already exists
                 conn.fd = fd
                 conn.dn = 'ANONYMOUS'
@@ -366,7 +402,7 @@ def main(argv):
                 conn.tls = True
                 continue
             elif chunk.startswith('closed'):
-                op.type = 'DISCONNECT'
+                op.set_request('DISCONNECT')
                 result = {}
                 try:
                     result['text'] = chunk[chunk.index('(')+1:-1]
@@ -435,7 +471,7 @@ def main(argv):
 
             if chunk == 'UNBIND':
                 op = conn.get_op_by_id(op_id)
-                op.type = 'UNBIND'
+                op.set_request('UNBIND')
                 op.set_result(error=0)
                 print(op.to_json())
                 conn.remove_op(op)
@@ -445,10 +481,10 @@ def main(argv):
             op = conn.get_op_by_id(op_id)
 
             if chunk == 'STARTTLS':
-                op.type = 'STARTTLS'
+                op.set_request('STARTTLS')
 
             elif chunk.startswith('BIND '):
-                op.type = 'BIND'
+                op.set_request('BIND')
                 if chunk.find(' method=') > 0:
                     m = re_bind_method.match(chunk)
                     if m is None:
@@ -481,7 +517,7 @@ def main(argv):
                     continue
 
             elif chunk.startswith('SRCH base='):
-                op.type = 'SEARCH'
+                op.set_request('SEARCH')
 
                 m = re_search_base.match(chunk)
                 if m is None:
@@ -497,7 +533,7 @@ def main(argv):
                 op.request['attrs'] = chunk[10:].split(' ')
 
             elif chunk.startswith('CMP '):
-                op.type = 'COMPARE'
+                op.set_request('COMPARE')
 
                 op.request['attrs'] = chunk[10:].split(' ')
                 m = re_cmp.match(chunk)
@@ -508,15 +544,15 @@ def main(argv):
                 op.request['attr'] = m.group('attr')
 
             elif chunk.startswith('ADD dn="'):
-                op.type = 'ADD'
+                op.set_request('ADD')
                 op.request['dn'] = chunk[8:-1]
 
             elif chunk.startswith('DEL dn="'):
-                op.type = 'DELETE'
+                op.set_request('DELETE')
                 op.request['dn'] = chunk[8:-1]
 
             elif chunk.startswith('MOD dn='):
-                op.type = 'MODIFY'
+                op.set_request('MODIFY')
 
                 m = re_modify_dn.match(chunk)
                 if m is None:
@@ -528,11 +564,11 @@ def main(argv):
                 op.request['attrs'] = chunk[9:].split(' ')
 
             elif chunk.startswith('MODRDN dn="'):
-                op.type = 'MODIFYRDN'
+                op.set_request('MODIFYRDN')
                 op.request['dn'] = chunk[11:-1]
 
             elif chunk.startswith('PASSMOD'):
-                op.type = 'PASSWORD'
+                op.set_request('PASSWORD')
                 request = op.request
                 if chunk.startswith('PASSMOD id="'):
                     rq_index = chunk.rfind('"')
