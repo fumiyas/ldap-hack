@@ -306,7 +306,7 @@ class Operation():
         }
 
 
-    def to_json(self, opts={ 'indent': 2 }):
+    def to_json(self):
         if self.request_datetime is None:
             etime = None
         else:
@@ -319,7 +319,7 @@ class Operation():
             'op_etime': etime,
             'op_request': self.request,
             'op_result': self.result,
-        }, **opts)
+        })
 
 
     def set_request(self, op_type):
