@@ -340,24 +340,33 @@ class Operation():
 
 
 def main(argv):
+    line_n = 0
+
     ## Guess log year (standard syslog has no year in timestamp)
-    dt_now = datetime.datetime.now()
-    year = dt_now.year
-    ## FIXME: Warn and exit if no input
-    firstline = sys.stdin.readline()
-    m = re_stats_line.match(firstline)
-    ## FIXME: Warn and exit if no match
-    month = month_by_abbr[m.group('month_abbr')]
-    mday = int(m.group('month_day'))
-    hour = int(m.group('hour'))
-    minute = int(m.group('minute'))
-    second = int(m.group('second'))
-    dt = datetime.datetime(year, month, mday, hour, minute, second, 0)
-    if dt > dt_now:
-        year = year - 1
+    year = None
+    for firstline in sys.stdin:
+        m = re_stats_line.match(firstline)
+        if m is None:
+            line_n += 1
+            continue
+
+        dt_now = datetime.datetime.now()
+        year = dt_now.year
+        month = month_by_abbr[m.group('month_abbr')]
+        mday = int(m.group('month_day'))
+        hour = int(m.group('hour'))
+        minute = int(m.group('minute'))
+        second = int(m.group('second'))
+        dt = datetime.datetime(year, month, mday, hour, minute, second, 0)
+        if dt > dt_now:
+            year = year - 1
+        break
+
+    if year is None:
+        ## No stats log
+        return 0
 
     conn_by_conn_id = {}
-    line_n = 0
     for line in itertools.chain([firstline], sys.stdin):
         line_n += 1
         line = line.rstrip()
