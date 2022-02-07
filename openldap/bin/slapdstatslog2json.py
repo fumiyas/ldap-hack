@@ -7,7 +7,7 @@
 ##
 ## -*- coding: utf-8 -*- vim:shiftwidth=4:expandtab:
 
-## FIXME: Calculate elapsed time as 'op_etime'
+## FIXME: Support OpenLDAP 2.5+
 
 import logging
 import sys
