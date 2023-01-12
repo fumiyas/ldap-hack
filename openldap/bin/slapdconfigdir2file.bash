@@ -5,12 +5,59 @@
 ##
 ## License: GNU General Public License version 3
 
-## FIXME: Decode Base64 values in *.ldif
 ## FIXME: Test with `{10}...` ... lines in slapd.d/**.ldif
 ## FIXME: Support slapd.d/olcDatabase={10}*.ldif ... files in slapd.d
 ## FIXME: Support slapd.d/olcDatabase=*/olcOverlay={10}*.ldif ... files in slapd.d
 
 set -u
+
+## ======================================================================
+
+pwarn() {
+  echo "$0: WARNING: $1" 1>&2
+}
+
+# shellcheck disable=SC2016
+ldif_unbase64_perl='
+## Decode base64-encoded attribute values in LDIF data
+## Copyright (c) 2013-2019 SATOH Fumiyasu @ OSS Technology Corp., Japan
+
+use strict;
+use warnings;
+use Encode;
+use MIME::Base64;
+
+sub unbase64
+{
+  my ($name, $value_b64) = @_;
+
+  my $value = MIME::Base64::decode($value_b64);
+  my $value_utf8 = eval {
+    Encode::decode_utf8(my $value_tmp=$value, Encode::FB_CROAK);
+  };
+
+  unless (!$@ && $value_utf8 =~ /\A[\p{IsPrint}\t\n\r\e]*\z/) {
+    return "${name}::$value_b64";
+  }
+
+  return "$name: $value\n";
+}
+
+$/ = "\n\n";
+while (<>) {
+  s/^(\w[\w\-]*(?:;\w[\w\-]*)*)::((?:[ \t]*[^\n]*\n)(?:[ \t]+[^\n]*\n)*)/unbase64($1, $2)/mge;
+  print;
+}
+'
+
+ldif_unbase64() {
+  if type perl >/dev/null 2>&1; then
+    perl -e "$ldif_unbase64_perl"
+  else
+    pwarn "perl not found to decode Base64 values in *.ldif"
+    cat
+  fi
+}
 
 ldif_unwrap() {
   sed \
@@ -22,6 +69,12 @@ ldif_unwrap() {
     "$@" \
   ;
 }
+
+ldif_normalize() {
+  ldif_unwrap "$@" |ldif_unbase64
+}
+
+## ======================================================================
 
 if [[ $# -ne 1 ]]; then
   echo "Usage: $0 SLAPD_DIR"
@@ -41,7 +94,7 @@ for schema_ldif_file in cn=config/cn=schema/cn=*.ldif; do
   echo "## Schema: ${schema_name}"
   echo "## ======================================================================"
 
-  ldif_unwrap "$schema_ldif_file" \
+  ldif_normalize "$schema_ldif_file" \
   |sed -E -n \
     -e 's/^olc([A-Z][A-Za-z]+): \{[0-9]+\}/\1 /p' \
   |sed -E \
@@ -55,13 +108,13 @@ for schema_ldif_file in cn=config/cn=schema/cn=*.ldif; do
   echo
 done
 
-ldif_unwrap cn=config/cn=module*.ldif \
+ldif_normalize cn=config/cn=module*.ldif \
 |sed -E -n \
   -e 's/^olc(ModuleLoad): \{[0-9]+\}([^.]+)(\.[a-z]+)?$/\1 \2/p' \
 ;
 echo
 
-ldif_unwrap cn=config.ldif \
+ldif_normalize cn=config.ldif \
 |sed -E -n \
   -e 's/^olc([A-Z][A-Za-z]+): /\1 /p' \
 ;
@@ -92,12 +145,12 @@ for db_ldif_file in cn=config/olcDatabase=*.ldif; do
   echo
   echo "Database $db_type"
 
-  ldif_unwrap "$db_ldif_file" \
+  ldif_normalize "$db_ldif_file" \
   |sed -E -n \
     -e '/^olcDatabase:/d' \
     -e 's/^olc(Db)?([A-Z][A-Za-z]+): (\{[0-9]+\})?/\2 /p' \
   |sed -E \
-    -e 's/^(RootDN )(.*)$/\1"\2"/' \
+    -e 's/^(Root(DN|PW) )(.*)$/\1"\3"/' \
     -e '/^(Access )/s/ by /\n\tby /g' \
   ;
 
@@ -114,7 +167,7 @@ for db_ldif_file in cn=config/olcDatabase=*.ldif; do
     echo
     echo "Overlay $db_overlay_name"
 
-    ldif_unwrap "$db_overlay_ldif_file" \
+    ldif_normalize "$db_overlay_ldif_file" \
     |sed -E -n \
       -e '/^olcOverlay:/d' \
       -e 's/^olc([A-Z][A-Za-z]+): (\{[0-9]+\})?/\1 /p' \
