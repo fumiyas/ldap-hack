@@ -5,6 +5,7 @@
 ##
 ## License: GNU General Public License version 3
 
+## FIXME: Decode Base64 values in *.ldif
 ## FIXME: Test with `{10}...` ... lines in slapd.d/**.ldif
 ## FIXME: Support slapd.d/olcDatabase={10}*.ldif ... files in slapd.d
 ## FIXME: Support slapd.d/olcDatabase=*/olcOverlay={10}*.ldif ... files in slapd.d
