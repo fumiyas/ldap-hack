@@ -44,8 +44,8 @@ for schema_ldif_file in cn=config/cn=schema/cn=*.ldif; do
   |sed -E -n \
     -e 's/^olc([A-Z][A-Za-z]+): \{[0-9]+\}/\1 /p' \
   |sed -E \
-    -e 's/^AttributeTypes /attributetype /' \
-    -e 's/^ObjectClasses /objectclass /' \
+    -e 's/^AttributeTypes /AttributeType /' \
+    -e 's/^ObjectClasses /ObjectClass /' \
     -e 's/ +(NAME|DESC|SYNTAX|SUP|EQUALITY|SUBSTR)([ \)])/\n\t\1\2/g' \
     -e 's/ +(SINGLE-VALUE)([ \)])/\n\t\1\2/g' \
     -e 's/ +(STRUCTURAL|AUXILIARY)([ \)])/\n\t\1\2/g' \
