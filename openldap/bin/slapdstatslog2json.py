@@ -135,7 +135,7 @@ re_stats_line = re.compile(
     r'(?P<month_abbr>[A-Z][a-z][a-z])'
     r' (?P<month_day>[\d ]\d)'
     r' (?P<time>(?P<hour>\d\d):(?P<minute>\d\d):(?P<second>\d\d))'
-    r' (?P<hostname>[\w\-]+)'
+    r' (?P<hostname>[\w\-.]+)'
     r' [\w\-]+\[(?P<pid>\d+)\]:'
     r' conn=(?P<conn_id>\d+)'
     r' (?P<what>fd|op)=(?P<id>[0-9]+)'
