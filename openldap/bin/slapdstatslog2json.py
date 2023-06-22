@@ -117,8 +117,8 @@ error_text_by_n = {
     0x1000: 'SYNC_REFRESH_REQUIRED',
 
     ## Private Use result codes
-    0x4100: 'X_SYNC_REFRESH_REQUIRED',  ## defunct
-    0x410f: 'X_ASSERTION_FAILED',       ## defunct
+    0x4100: 'X_SYNC_REFRESH_REQUIRED',  # defunct
+    0x410f: 'X_ASSERTION_FAILED',       # defunct
     ## LDAP No-Op control
     0x410e: 'X_NO_OPERATION',
     ## Chaining Behavior control
@@ -217,61 +217,49 @@ class Connection():
             'dn': None,
         }
 
-
     @property
     def id(self):
         return self.info['conn']
-
 
     @id.setter
     def id(self, id):
         self.info['conn'] = id
 
-
     @property
     def fd(self):
         return self.info['fd']
-
 
     @fd.setter
     def fd(self, fd):
         self.info['fd'] = fd
 
-
     @property
     def tls(self):
         return self.info['tls']
-
 
     @tls.setter
     def tls(self, tls_p):
         self.info['tls'] = tls_p
 
-
     @property
     def source(self):
         return self.info['source']
-
 
     @source.setter
     def source(self, source):
         self.info['source'] = source
 
-
     @property
     def dn(self):
         return self.info['dn']
-
 
     @dn.setter
     def dn(self, dn):
         self.info['dn'] = dn
 
-
     def unbind(self):
         self.info['dn_unbound'] = self.info['dn']
         self.dn = 'UNBOUND'
-
 
     def get_op_by_id(self, op_id):
         if op_id not in self.op_by_id:
@@ -279,10 +267,9 @@ class Connection():
 
         return self.op_by_id[op_id]
 
-
     def remove_op(self, op):
         try:
-            del(self.op_by_id[op.id])
+            del self.op_by_id[op.id]
         except KeyError:
             pass
 
@@ -305,7 +292,6 @@ class Operation():
             'error_text': None,
         }
 
-
     def to_json(self):
         if self.request_datetime is None:
             etime = None
@@ -321,13 +307,11 @@ class Operation():
             'op_result': self.result,
         })
 
-
     def set_request(self, op_type):
         self.type = op_type
         self.request_datetime = self.conn.datetime
         self.request['line_n'] = self.conn.line_n
         self.request['timestamp'] = self.request_datetime.isoformat()
-
 
     def set_result(self, error, result=None):
         self.result_datetime = self.conn.datetime
@@ -414,12 +398,12 @@ def main(argv):
                 op.set_request('DISCONNECT')
                 result = {}
                 try:
-                    result['text'] = chunk[chunk.index('(')+1:-1]
+                    result['text'] = chunk[chunk.index('(') + 1:-1]
                 except ValueError:
                     pass
                 op.set_result(error=0, result=result)
                 try:
-                    del(conn_by_conn_id[conn_id])
+                    del conn_by_conn_id[conn_id]
                 except KeyError:
                     pass
 
@@ -581,16 +565,16 @@ def main(argv):
                 request = op.request
                 if chunk.startswith('PASSMOD id="'):
                     rq_index = chunk.rfind('"')
-                    request['dn'] = dn = chunk[12:rq_index]
-                    chunk = chunk[rq_index+1:]
+                    request['dn'] = chunk[12:rq_index]
+                    chunk = chunk[rq_index + 1:]
                 ## New password is supplied
                 request['new'] = (chunk.find(' new') >= 0)
                 ## Old password is supplied
                 request['old'] = (chunk.find(' old') >= 0)
 
-            elif chunk.startswith('EXT '): ## FIXME: conn=100931 op=0 EXT oid=...
+            elif chunk.startswith('EXT '):  # FIXME: conn=100931 op=0 EXT oid=...
                 continue
-            elif chunk.startswith('ABANDON msg='): ## FIXME
+            elif chunk.startswith('ABANDON msg='):  # FIXME
                 continue
 
             ## FIXME: Support CANCEL WHOAMI PROXYAUTHZ DENIED
