@@ -159,7 +159,7 @@ re_bind_mech = re.compile(
     r'BIND'
     r' (dn="(?P<dn>[^"]*)"|anonymous)'
     r' mech=(?P<mech>\w+)'
-    r'( sasl_ssf=(?P<sasl_ssf>\d+))?'
+    r'( (bind|sasl)_ssf=(?P<bind_ssf>\d+))?'
     r' ssf=(?P<ssf>\d+)'
     '$'
 )
@@ -191,6 +191,8 @@ re_result = re.compile(
     r'( tag=(?P<tag>\d+))?'
     r'( oid=(?P<oid>\W*))?'
     r' err=(?P<error>\d+)'
+    r'( qtime=(?P<qtime>\d+\.\d+))?'
+    r'( etime=(?P<etime>\d+\.\d+))?'
     r' text=(?P<text>.*)'
     '$'
 )
@@ -198,6 +200,8 @@ re_search_result = re.compile(
     r'SEARCH RESULT'
     r' tag=(?P<tag>\d+)'
     r' err=(?P<error>\d+)'
+    r'( qtime=(?P<qtime>\d+\.\d+))?'
+    r'( etime=(?P<etime>\d+\.\d+))?'
     r' nentries=(?P<nentries>\d+)'
     r' text=(?P<text>.*)'
     '$'
@@ -293,16 +297,16 @@ class Operation():
         }
 
     def to_json(self):
-        if self.request_datetime is None:
-            etime = None
-        else:
-            etime = (self.result_datetime - self.request_datetime).total_seconds()
+        if 'etime' not in self.result:  # OpenLDAP 2.4
+            if self.request_datetime is None:
+                self.result['etime'] = None
+            else:
+                self.result['etime'] = (self.result_datetime - self.request_datetime).total_seconds()
 
         return json.dumps({
             **self.conn.info,
             'op': self.id,
             'op_type': self.type,
-            'op_etime': etime,
             'op_request': self.request,
             'op_result': self.result,
         })
@@ -434,6 +438,10 @@ def main(argv):
                     result['tag'] = int(m.group('tag'))
                 if m.group('oid') is not None:
                     result['oid'] = m.group('oid')
+                if m.group('qtime') is not None:
+                    result['qtime'] = float(m.group('qtime'))
+                if m.group('etime') is not None:
+                    result['etime'] = float(m.group('etime'))
                 op.set_result(error=error, result=result)
                 print(op.to_json())
                 conn.remove_op(op)
@@ -457,6 +465,10 @@ def main(argv):
                     'tag': int(m.group('tag')),
                     'text': m.group('text'),
                 }
+                if m.group('qtime') is not None:
+                    result['qtime'] = float(m.group('qtime'))
+                if m.group('etime') is not None:
+                    result['etime'] = float(m.group('etime'))
                 op.set_result(error=error, result=result)
                 print(op.to_json())
                 conn.remove_op(op)
@@ -496,8 +508,8 @@ def main(argv):
                         op.request['dn'] = 'ANONYMOUS'
                     op.request['mech'] = m.group('mech')
                     op.request['ssf'] = int(m.group('ssf'))
-                    if 'sasl_ssf' in m.groupdict():
-                        op.request['sasl_ssf'] = m.group('sasl_ssf')
+                    if 'bind_ssf' in m.groupdict():
+                        op.request['bind_ssf'] = m.group('bind_ssf')
                 elif chunk.find(' authcid=') > 0:
                     m = re_bind_authcid.match(chunk)
                     if m is None:
