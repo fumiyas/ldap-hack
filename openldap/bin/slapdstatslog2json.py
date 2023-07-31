@@ -514,7 +514,7 @@ def main(argv):
                     op.request['mech'] = m.group('mech')
                     op.request['ssf'] = int(m.group('ssf'))
                     if 'bind_ssf' in m.groupdict():
-                        op.request['bind_ssf'] = m.group('bind_ssf')
+                        op.request['bind_ssf'] = int(m.group('bind_ssf'))
                 elif chunk.find(' authcid=') > 0:
                     m = re_bind_authcid.match(chunk)
                     if m is None:
