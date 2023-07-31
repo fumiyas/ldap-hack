@@ -158,7 +158,7 @@ re_bind_authcid = re.compile(
 re_bind_mech = re.compile(
     r'BIND'
     r' (dn="(?P<dn>[^"]*)"|anonymous)'
-    r' mech=(?P<mech>\w+)'
+    r' mech=(?P<mech>[\w\-]+)'
     r'( (bind|sasl)_ssf=(?P<bind_ssf>\d+))?'
     r' ssf=(?P<ssf>\d+)'
     '$'
