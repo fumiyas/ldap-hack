@@ -164,6 +164,11 @@ re_bind_mech = re.compile(
     '$'
 )
 
+re_whoami = re.compile(
+    r'WHOAMI'
+    '$'
+)
+
 re_search_base = re.compile(
     r'SRCH'
     r' base="(?P<base>[^"]*)"'
@@ -519,6 +524,14 @@ def main(argv):
                     op.request['authzid'] = m.group('authzid')
                 else:
                     logger.error(f'Invalid `BIND` line: {line_n}: {line}')
+                    continue
+
+            elif chunk.startswith('WHOAMI'):
+                op.set_request('WHOAMI')
+
+                m = re_whoami.match(chunk)
+                if m is None:
+                    logger.error(f'Invalid `WHOAMI` line: {line_n}: {line}')
                     continue
 
             elif chunk.startswith('SRCH base='):
