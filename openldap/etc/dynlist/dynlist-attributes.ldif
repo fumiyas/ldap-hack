@@ -1,0 +1,4 @@
+dn: cn=mail,ou=DynamicList,dc=example,dc=jp
+objectClass: groupOfURLs
+cn: mail
+memberURL: ldap:///ou=Users,dc=example,dc=jp?mail,mailAlternateAddress?sub?(objectClass=mailRecipient)
