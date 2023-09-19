@@ -5,6 +5,8 @@
 ##
 ## License: GNU General Public License version 3
 
+## FIXME: Support for slapd.conf(5) directive names in the "Foo-Bar-Qux" or
+##        "Foo_Bar_Qux" format, rather than the "FooBarQux" format.
 ## FIXME: Test with `{10}...` ... lines in slapd.d/**.ldif
 ## FIXME: Support slapd.d/olcDatabase={10}*.ldif ... files in slapd.d
 ## FIXME: Support slapd.d/olcDatabase=*/olcOverlay={10}*.ldif ... files in slapd.d
