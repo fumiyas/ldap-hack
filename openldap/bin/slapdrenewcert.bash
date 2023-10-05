@@ -1,6 +1,6 @@
 #!/bin/bash
 ##
-## OpenLDAP: certbot(1) renew-hook script for the LDAP server certificate
+## OpenLDAP: certbot(1) --deploy-hook script for the server certificate
 ## Copyright (c) 2023 SATOH Fumiyasu @ OSSTech Corp., Japan
 ##
 ## License: GNU General Public License version 3
