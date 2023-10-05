@@ -21,7 +21,7 @@ cb_key_path="$RENEWED_LINEAGE/privkey.pem"
 pubkey_digest1=$(openssl x509 -pubkey -in "$cb_cert_path" -noout |openssl md5)
 pubkey_digest2=$(openssl pkey -pubout -in "$cb_key_path" |openssl md5)
 if [[ "$pubkey_digest1" != "$pubkey_digest2" ]]; then
-  echo "$0: ERROR: Invalid certificat/key pair" 1>&2
+  echo "$0: ERROR: Invalid certificate/key pair" 1>&2
   exit 1
 fi
 
