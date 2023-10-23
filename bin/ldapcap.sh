@@ -12,7 +12,10 @@
 ## http://www.networksorcery.com/enp/protocol/ldap.htm
 ## LDAP OID Reference Guide – LDAP.com
 ## https://ldap.com/ldap-oid-reference-guide/
-
+## Directory Services 7 > LDAP Reference > Supported LDAP Controls
+## https://backstage.forgerock.com/docs/ds/7/ldap-reference/controls.html
+## Directory Services 7 > LDAP Reference > Supported LDAP Extended Operations
+## https://backstage.forgerock.com/docs/ds/7/ldap-reference/extended-ops.html
 set -u
 set -e
 
