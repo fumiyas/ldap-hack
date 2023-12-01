@@ -35,7 +35,7 @@ def entry(ldif_in):
     buf = ""
     dn = None
     key = ""
-    include = False
+    skipped = False
 
     for line in ldif_in:
         line = line.rstrip('\n')
@@ -44,13 +44,13 @@ def entry(ldif_in):
                 break
             continue
         if line[0] == '#':
+            skipped = True
             continue
 
-        ## FIXME: LDIF can wrap comment lines :-(
         if line[0] == ' ':
-            if not key:
-                raise ValueError(f"Wrapped line without attribute name found: {line}")
-            if include:
+            if not skipped:
+                if not key:
+                    raise ValueError(f"Wrapped line without attribute name found: {line}")
                 buf = buf + line[1:]
         else:
             colon = line.find(':')
@@ -58,17 +58,19 @@ def entry(ldif_in):
                 raise ValueError(f"Invalid attribute line (no colon `:`): {line}")
 
             if dn is None and buf:
-                if buf[0:4] != 'dn: ':
+                if buf[0:3] != 'dn:':
                     raise ValueError(f"Invalid DN line: {buf}")
-                dn = buf[4:]
+                dn = buf[3:].lstrip(' ')
                 buf = ""
 
             key = line[0:colon]
-            include = key not in exclude_attrs
-            if include:
+            if key in include_attrs or key not in exclude_attrs:
+                skipped = False
                 if buf:
                     buf += '\n'
                 buf += line
+            else:
+                skipped = True
 
     if dn is None:
         return None
