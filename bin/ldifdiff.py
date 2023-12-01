@@ -173,6 +173,7 @@ def modify(oldentry, newentry, oldentry_decode, newentry_decode, dn, modfh):
     print("", file=modfh)
 
 
+include_attrs = set()
 exclude_attrs = set((
     "modifyTimestamp",
     "modifiersName",
@@ -198,12 +199,17 @@ args_parser.add_argument(
     help='LDIF file 2',
 )
 args_parser.add_argument(
-    ## FIXME '--include-attrs', '-i', metavar='NAME',
+    '--include-attrs', '-i', metavar='NAME',
+    help='Specify attribute name(s) to be included'
+)
+args_parser.add_argument(
     '--exclude-attrs', '-e', metavar='NAME',
     help='Specify attribute name(s) to be excluded'
 )
 args = args_parser.parse_args()
 
+if args.include_attrs:
+    include_attrs.update(args.include_attrs.split(','))
 if args.exclude_attrs:
     exclude_attrs.update(args.exclude_attrs.split(','))
 
