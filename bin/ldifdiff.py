@@ -46,6 +46,7 @@ def entry(ldif_in):
         if line[0] == '#':
             continue
 
+        ## FIXME: LDIF can wrap comment lines :-(
         if line[0] == ' ':
             if not key:
                 raise ValueError(f"Wrapped line without attribute name found: {line}")
@@ -195,6 +196,7 @@ args_parser.add_argument(
     help='LDIF file 2',
 )
 args_parser.add_argument(
+    ## FIXME '--include-attrs', '-i', metavar='NAME',
     '--exclude-attrs', '-e', metavar='NAME',
     help='Specify attribute name(s) to be excluded'
 )
