@@ -22,8 +22,8 @@ import tempfile
 
 debug_p = os.getenv('LDIFDIFF_DEBUG')
 
-kv_re = re.compile(r'^(?P<key>[^:]+)::? (?P<value>.*)')
-kv_b64_re = re.compile(r'^(?P<key>[^:]+):: (?P<value>.*)')
+kv_re = re.compile(r'^(?P<key>[A-Za-z][-.;0-9A-Za-z]*)::? *(?P<value>.*)')
+kv_b64_re = re.compile(r'^(?P<key>[A-Za-z][-.;0-9A-Za-z]*):: *(?P<value>.*)')
 
 
 def debug(msg):
