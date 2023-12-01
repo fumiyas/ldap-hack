@@ -116,7 +116,7 @@ def modify(oldentry, newentry, oldentry_decode, newentry_decode, dn, modfh):
                 oldattr[key] = ''
             oldattr[key] += kv + '\n'
         else:
-            raise ValueError(f"Unsupported LDIF format: {kv}")
+            raise ValueError(f"Unsupported LDIF format in old data: {kv}")
 
     for kv in oldentry_decode.split('\n'):
         m = kv_re.search(kv)
@@ -126,7 +126,7 @@ def modify(oldentry, newentry, oldentry_decode, newentry_decode, dn, modfh):
                 oldattr_decode[key] = ''
             oldattr_decode[key] += kv + '\n'
         else:
-            raise ValueError(f"Unsupported LDIF format: {kv}")
+            raise ValueError(f"Unsupported LDIF format in old data: {kv}")
 
     for kv in newentry.split('\n'):
         debug(f"adding new attr: {kv} for {dn}")
@@ -137,7 +137,7 @@ def modify(oldentry, newentry, oldentry_decode, newentry_decode, dn, modfh):
                 newattr[key] = ''
             newattr[key] += kv + '\n'
         else:
-            raise ValueError(f"Unsupported LDIF format: {kv}")
+            raise ValueError(f"Unsupported LDIF format in new data: {kv}")
 
     for kv in newentry_decode.split('\n'):
         m = kv_re.search(kv)
@@ -147,7 +147,7 @@ def modify(oldentry, newentry, oldentry_decode, newentry_decode, dn, modfh):
                 newattr_decode[key] = ''
             newattr_decode[key] += kv + '\n'
         else:
-            raise ValueError(f"Unsupported LDIF format: {kv}")
+            raise ValueError(f"Unsupported LDIF format in new data: {kv}")
 
     for key in oldattr.keys():
         debug(f"checking attr: {key} for {dn}")
