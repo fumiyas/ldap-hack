@@ -183,7 +183,10 @@ exclude_attrs = set((
     "createTimestamp",
     "creatorsName",
     "structuralObjectClass",
+    "entryDN",
+    "subschemaSubentry",
     "numSubordinates",
+    "hasSubordinates",
 ))
 
 args_parser = argparse.ArgumentParser(
