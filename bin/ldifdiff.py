@@ -33,7 +33,6 @@ def debug(msg):
 
 def entry(ldif_in):
     buf = ""
-    e = ""
     dn = None
     key = ""
     include = False
@@ -73,7 +72,11 @@ def entry(ldif_in):
     if dn is None:
         return None
 
-    return { 'dn': dn, 'entry': buf }
+    return {
+        'dn': dn,
+        'entry': buf
+    }
+
 
 def decode(buf):
     dec = []
@@ -149,34 +152,34 @@ def modify(oldentry, newentry, oldentry_decode, newentry_decode, dn, modfh):
         if key not in newattr:
             debug(f"attr delete: {key}")
             print(f"delete: {key}", file=modfh)
-            print(f"-", file=modfh)
+            print("-", file=modfh)
         else:
             if oldattr_decode[key] != newattr_decode[key]:
                 debug(f"attr modify: {key} -> {newattr[key].rstrip()}")
                 print(f"replace: {key}", file=modfh)
                 print(newattr[key], end='', file=modfh)
-                print(f"-", file=modfh)
+                print("-", file=modfh)
             del newattr[key]
 
     for key in newattr.keys():
         debug(f"attr add: {key}")
         print(f"add: {key}", file=modfh)
         print(newattr[key], end='', file=modfh)
-        print(f"-", file=modfh)
+        print("-", file=modfh)
 
     print("", file=modfh)
 
 
 exclude_attrs = set((
-  "modifyTimestamp",
-  "modifiersName",
-  "contextCSN",
-  "entryCSN",
-  "entryUUID",
-  "createTimestamp",
-  "creatorsName",
-  "structuralObjectClass",
-  "numSubordinates",
+    "modifyTimestamp",
+    "modifiersName",
+    "contextCSN",
+    "entryCSN",
+    "entryUUID",
+    "createTimestamp",
+    "creatorsName",
+    "structuralObjectClass",
+    "numSubordinates",
 ))
 
 args_parser = argparse.ArgumentParser(
@@ -210,8 +213,8 @@ newentry = {}
 newentry_decode = {}
 
 while True:
-    odn = "";
-    ndn = "";
+    odn = ""
+    ndn = ""
 
     oe = entry(oldin)
     if oe:
