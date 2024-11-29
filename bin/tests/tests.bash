@@ -16,6 +16,7 @@ for i in awk sed pl; do
   for a_ldif in */one-entry-*.ldif; do
     for b_ldif in */one-entry-*.ldif; do
       "$ldifunwrap_cmd" <"$a_ldif" |ldifdiff.py "$b_ldif" /dev/stdin
+      "$ldifunwrap_cmd" <"$a_ldif" |ldifdiff.pl "$b_ldif" /dev/stdin
     done
   done
 
