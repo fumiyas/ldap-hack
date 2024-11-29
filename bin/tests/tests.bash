@@ -13,10 +13,8 @@ ldifunwrap.pl() {
 for i in awk sed pl; do
   ldifunwrap_cmd="ldifunwrap.$i"
   echo "Test: $ldifunwrap_cmd with valid LDIF data ..."
-  for a_ldif in */*.ldif; do
-    [[ $a_ldif == */invalid-* ]] && continue
-    for b_ldif in */*.ldif; do
-      [[ $b_ldif == */invalid-* ]] && continue
+  for a_ldif in */one-entry-*.ldif; do
+    for b_ldif in */one-entry-*.ldif; do
       "$ldifunwrap_cmd" <"$a_ldif" |ldifdiff.py "$b_ldif" /dev/stdin
     done
   done

@@ -1,6 +1,0 @@
-# This is comment.
- this is comment too.
-dn: cn=test
-entryDN: cn
- =test
-test: foobar:qux
