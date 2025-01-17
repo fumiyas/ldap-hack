@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
+## -*- coding: utf-8 -*- vim:shiftwidth=4:expandtab:
 ##
 ## OpenLDAP: Annotate and Convert slapd stats log to JSON
-## Copyright (c) 2020-2021 SATOH Fumiyasu @ OSS Technology Corp., Japan
 ##
-## License: GNU General Public License version 3
+## SPDX-FileCopyrightText: 2020-2025 SATOH Fumiyasu @ OSSTech Corp., Japan
+## SPDX-License-Identifier: GPL-3.0-or-later
 ##
-## -*- coding: utf-8 -*- vim:shiftwidth=4:expandtab:
 
 ## FIXME: Support OpenLDAP 2.5+
 

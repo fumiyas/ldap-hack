@@ -1,9 +1,10 @@
 #!/bin/bash
 ##
 ## OpenLDAP: Convert slapd.d to slapd.conf
-## Copyright (c) 2023 SATOH Fumiyasu @ OSSTech Corp., Japan
 ##
-## License: GNU General Public License version 3
+## SPDX-FileCopyrightText: 2023-2025 SATOH Fumiyasu @ OSSTech Corp., Japan
+## SPDX-License-Identifier: GPL-3.0-or-later
+##
 
 ## FIXME: Support for slapd.conf(5) directive names in the "Foo-Bar-Qux" or
 ##        "Foo_Bar_Qux" format, rather than the "FooBarQux" format.

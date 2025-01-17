@@ -1,9 +1,9 @@
 #!/bin/bash
 ##
 ## OpenLDAP: certbot(1) --deploy-hook script for the server certificate
-## Copyright (c) 2023 SATOH Fumiyasu @ OSSTech Corp., Japan
 ##
-## License: GNU General Public License version 3
+## SPDX-FileCopyrightText: 2023-2025 SATOH Fumiyasu @ OSSTech Corp., Japan
+## SPDX-License-Identifier: GPL-3.0-or-later
 ##
 
 set -u
