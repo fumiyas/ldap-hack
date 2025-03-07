@@ -2,5 +2,5 @@
 dn: cn=test,ou=Users,
  dc=example,dc=jp
 cn: test
-givenName;lang-ja: 44Gq44Gq44GX
+givenName;lang-ja:: 44Gq44Gq44GX
 test: foobar: qux
