@@ -135,6 +135,9 @@ ldapsearch \
     1.3.6.1.1.14)
       desc="Modify-Increment Feature (RFC 4525)"
       ;;
+    1.3.6.1.4.1.42.2.27.8.5.1)
+      desc="Password Policy Control (IETF draft, OpenLDAP)"
+      ;;
     1.3.6.1.4.1.42.2.27.9.5.8)
       desc="Account Usable Request and Response Control (Sun)"
       ;;
