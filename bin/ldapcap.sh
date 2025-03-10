@@ -91,7 +91,7 @@ ldapsearch \
       desc="Tree delete Control"
       ;;
     1.2.840.113556.1.4.841)
-      desc="Directory synchronization Control"
+      desc="Directory synchronization Control (IETF draft, Active Directory)"
       ;;
     1.2.840.113556.1.4.970)
       desc="Get stats Control"
@@ -138,6 +138,9 @@ ldapsearch \
     1.3.6.1.1.12)
       desc="Assertion Control (RFC 4528)"
       ;;
+    1.3.6.1.1.22)
+      desc="LDAP Don’t Use Copy Control (RFC 6171)"
+      ;;
     1.3.6.1.1.13.1)
       desc="LDAP Pre-read Control (RFC 4527)"
       ;;
@@ -147,8 +150,14 @@ ldapsearch \
     1.3.6.1.1.14)
       desc="Modify-Increment Feature (RFC 4525)"
       ;;
+    1.3.6.1.1.21.1)
+      desc="Start Transaction Extended Request (RFC 5805)"
+      ;;
+    1.3.6.1.1.21.3)
+      desc="End Transaction Extended Request (RFC 5805)"
+      ;;
     1.3.6.1.4.1.42.2.27.8.5.1)
-      desc="Password Policy Control (IETF draft, OpenLDAP)"
+      desc="Password Policy Control (IETF draft, OpenLDAP slapo-ppolicy(5))"
       ;;
     1.3.6.1.4.1.42.2.27.9.5.8)
       desc="Account Usable Request and Response Control (Sun)"
@@ -175,7 +184,7 @@ ldapsearch \
       desc="Language Range Options (RFC 3866)"
       ;;
     1.3.6.1.4.1.4203.1.9.1.1)
-      desc="LDAP Content Synchronization Control (RFC 4533)"
+      desc="LDAP Content Synchronization Control (RFC 4533, OpenLDAP slapo-syncprov(5))"
       ;;
     1.3.6.1.4.1.4203.1.10.1)
       desc="Subentries (RFC 3672)"
@@ -209,7 +218,7 @@ ldapsearch \
   esac
 
   if [[ -n $desc ]]; then
-    echo "## $desc"
+    echo "## $attr $desc"
   fi
   echo "$attr $value"
 done
