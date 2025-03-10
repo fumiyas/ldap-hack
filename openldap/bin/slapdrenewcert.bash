@@ -12,6 +12,33 @@ shopt -s lastpipe || exit $?		## bash 4.2+
 
 set -e
 
+run() {
+  if [[ -n ${SLAPDRENEWCERT_DEBUG-} ]]; then
+    echo "$0: DEBUG: Run: $*" 1>&2
+  fi
+  if [[ -n ${SLAPDRENEWCERT_NO_RUN-} ]]; then
+    return
+  fi
+  "$@"
+}
+
+run_or_discard_stdin() {
+  if [[ -n ${SLAPDRENEWCERT_DEBUG-} ]]; then
+    echo "$0: DEBUG: Run: $*" 1>&2
+  fi
+  if [[ -n ${SLAPDRENEWCERT_NO_RUN-} ]]; then
+    sed d
+  fi
+  "$@"
+}
+
+run_always() {
+  if [[ -n ${SLAPDRENEWCERT_DEBUG-} ]]; then
+    echo "$0: DEBUG: Run: $*" 1>&2
+  fi
+  "$@"
+}
+
 ## Generate install(1) options from a path to preserve the mode, owner and group
 path2install_options() {
   local path="$1"; shift
@@ -48,7 +75,9 @@ if [[ "$pubkey_digest1" != "$pubkey_digest2" ]]; then
   exit 1
 fi
 
-ldapsearch \
+## FIXME: If slapd is not running? (or no slapi:/// socket)
+
+run_always ldapsearch \
   "${ldap_command_options[@]}" \
   -b cn=config \
   -s base \
@@ -57,6 +86,7 @@ ldapsearch \
   '(objectClass=*)' \
   olcTLSCertificateFile \
   olcTLSCertificateKeyFile \
+|tee ${SLAPDRENEWCERT_DEBUG+>(sed -n "s|^.|$0: DEBUG: Current cn=config: &|p" >/dev/stderr)} \
 |while IFS=' ' read -r attr value; do
   case "$attr" in
   olcTLSCertificateFile:)
@@ -69,31 +99,34 @@ ldapsearch \
 done
 
 # shellcheck disable=SC2046 # Quote this to prevent word splitting
-install \
+run install \
   "${install_command_options[@]}" \
   $(path2install_options "$cert_path") \
   "$cb_cert_path" \
   "$cert_path" \
 ;
 # shellcheck disable=SC2046 # Quote this to prevent word splitting
-install \
+run install \
   "${install_command_options[@]}" \
   $(path2install_options "$key_path") \
   "$cb_key_path" \
   "$key_path" \
 ;
 
-(
-  echo 'dn: cn=config'
-  echo 'changetype: modify'
-  echo 'replace: olcTLSCertificateFile'
-  echo "olcTLSCertificateFile: $cert_path"
-  echo -
-  echo 'replace: olcTLSCertificateKeyFile'
-  echo "olcTLSCertificateKeyFile: $key_path"
-  echo -
-) \
-|ldapmodify \
+{
+echo "\
+dn: cn=config
+changetype: modify
+replace: olcTLSCertificateFile
+olcTLSCertificateFile: $cert_path
+-
+replace: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: $key_path
+-
+"
+} \
+|tee ${SLAPDRENEWCERT_DEBUG+>(sed -n "s|^.|$0: DEBUG: Renew cn=config: &|p" >/dev/stderr)} \
+|run_or_discard_stdin ldapmodify \
   "${ldap_command_options[@]}" \
 >/dev/null \
 ;
