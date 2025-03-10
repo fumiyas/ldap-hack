@@ -202,12 +202,16 @@ args_parser.add_argument(
     'file2', metavar='FILE2',
     help='LDIF file 2',
 )
+## FIXME: Support multiple -i option
 args_parser.add_argument(
     '--include-attrs', '-i', metavar='NAME',
+    ## FIXME: Describe comma-separated value
     help='Specify attribute name(s) to be included'
 )
+## FIXME: Support multiple -e option
 args_parser.add_argument(
     '--exclude-attrs', '-e', metavar='NAME',
+    ## FIXME: Describe comma-separated value
     help='Specify attribute name(s) to be excluded'
 )
 args = args_parser.parse_args()
