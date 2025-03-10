@@ -19,19 +19,31 @@
 set -u
 set -e
 
-if [ $# -eq 0 ]; then
-  echo "Usage: $0 ldap[s]://SERVER[:PORT]"
+if [[ ${1-} == @(-h|--help) ]]; then
+  echo "Usage: $0 [URL [ldapsearch(1) options ...]]"
   exit 0
 fi
 
-url="$1"; shift
+ldap_opts=()
+
+if [[ $# -gt 0 ]]; then
+  ldap_opts+=(-H "$1")
+  shift
+else
+  ldap_opts+=(-H ldapi:///)
+fi
+
+if [[ $# -gt 0 ]]; then
+  ldap_opts+=("$@")
+else
+  ldap_opts+=(-x)
+fi
 
 ldapsearch \
   -LLL \
-  -x \
-  -H "$url" \
   -b '' \
   -s base \
+  "${ldap_opts[@]}" \
   'objectclass=*' \
   '*' \
   '+' \
