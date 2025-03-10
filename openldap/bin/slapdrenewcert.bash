@@ -12,9 +12,32 @@ shopt -s lastpipe || exit $?		## bash 4.2+
 
 set -e
 
+## Generate install(1) options from a path to preserve the mode, owner and group
+path2install_options() {
+  local path="$1"; shift
+  local mode owner group
+
+  if [[ -s $path ]]; then
+    # shellcheck disable=SC2012 # Use find instead of ls ...
+    ls -dln -- "$path" \
+    |sed -n -E '1s/^.(...)(...)(...) +[0-9]+/u=\1,g=\2,o=\3/p' \
+    |read -r mode owner group _ \
+    ;
+  else
+    mode='0440'
+    for group_try in ldap openldap; do
+      if getent group "$group_try" >/dev/null; then
+        group="$group_try"
+        break
+      fi
+    done
+  fi
+
+  echo "${mode+-m $mode} ${owner+-o $owner} ${group+-g $group}"
+}
+
 install_command_options=(--backup)
 ldap_command_options=(-H ldapi:/// -Y external -Q)
-ldap_group="openldap"
 cb_cert_path="$RENEWED_LINEAGE/fullchain.pem"
 cb_key_path="$RENEWED_LINEAGE/privkey.pem"
 
@@ -45,17 +68,17 @@ ldapsearch \
   esac
 done
 
+# shellcheck disable=SC2046 # Quote this to prevent word splitting
 install \
   "${install_command_options[@]}" \
-  -m 0444 \
-  -g "$ldap_group" \
+  $(path2install_options "$cert_path") \
   "$cb_cert_path" \
   "$cert_path" \
 ;
+# shellcheck disable=SC2046 # Quote this to prevent word splitting
 install \
   "${install_command_options[@]}" \
-  -m 0440 \
-  -g "$ldap_group" \
+  $(path2install_options "$key_path") \
   "$cb_key_path" \
   "$key_path" \
 ;
