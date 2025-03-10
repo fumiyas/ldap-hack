@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-## -*- coding: utf-8 -*- vim:shiftwidth=4:expandtab:
-##
-## ldifdiff: Compare two ldif files
-## Copyright (c) 2023 SATOH Fumiyasu @ OSSTech Corp., Japan
-##
-## Ported from ldif-diff implemented in Perl
-##
-## Original ldif-diff copyright:
-##   GPL copyright 2004 by VA Linux Systems Japan, K.K
-##   Writen by Masato Taruishi <taru@valinux.co.jp>
-##
+# -*- coding: utf-8 -*- vim:shiftwidth=4:expandtab:
+#
+# ldifdiff: Compare two ldif files
+#
+# SPDX-FileCopyrightText: 2023 SATOH Fumiyasu @ OSSTech Corp., Japan
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Ported from ldif-diff implemented in Perl
+# Original ldif-diff copyright:
+#   GPL copyright 2004 by VA Linux Systems Japan, K.K
+#   Writen by Masato Taruishi <taru@valinux.co.jp>
+#
 
 ## FIXME: Replace debug() with logging module
 

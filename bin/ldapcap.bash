@@ -1,11 +1,9 @@
 #!/bin/bash
 ##
 ## Query LDAP server capabilities
-## Copyright (c) 2007-2023 SATOH Fumiyasu @ OSSTech Corp, Japan
-##               <https://www.OSSTech.co.jp/>
-##               <https://GitHub.com/fumiyas/>
 ##
-## License: GNU General Public License version 2 or later
+## SPDX-FileCopyrightText: 2007-2025 SATOH Fumiyasu @ OSSTech Corp., Japan
+## SPDX-License-Identifier: GPL-3.0-or-later
 ##
 
 ## LDAP, Lightweight Directory Access Protocol

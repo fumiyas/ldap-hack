@@ -2,8 +2,8 @@
 # GPL copyright 2004 by VA Linux Systems Japan, K.K
 #   Writen by Masato Taruishi <taru@valinux.co.jp>
 #
-# Copyright (c) 2011 SATOH Fumiyasu @ OSS Technology, Inc.
-#               <http://www.osstech.co.jp/>
+# SPDX-FileCopyrightText: 2011-2025 SATOH Fumiyasu @ OSSTech Corp., Japan
+# SPDX-License-Identifier: GPL-2.0-or-later
 #
 
 =head1 NAME

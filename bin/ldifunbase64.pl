@@ -1,11 +1,9 @@
 #!/usr/bin/perl
 ##
 ## Decode base64-encoded attribute values in LDIF data
-## Copyright (c) 2013-2019 SATOH Fumiyasu @ OSS Technology Corp., Japan
-##               <https://www.OSSTech.co.jp/>
-##               <https://GitHub.com/fumiyas/>
 ##
-## License: GNU General Public License version 2 or later
+## SPDX-FileCopyrightText: 2013-2025 SATOH Fumiyasu @ OSSTech Corp., Japan
+## SPDX-License-Identifier: GPL-3.0-or-later
 ##
 
 use strict;
