@@ -115,16 +115,16 @@ ldapsearch \
       desc="Attribute scoped query Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.1781)
-      desc="Fast concurrent bind extended operation (Active Directory)"
+      desc="Fast concurrent bind extended operation Extension (Active Directory)"
       ;;
     1.2.840.113556.1.4.1852)
       desc="Server Quota Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.1907)
-      desc="Server Shutdown Notify (Active Directory)"
+      desc="Server Shutdown Notify Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.1948)
-      desc="Server Range Retrieval No-error (Active Directory)"
+      desc="Server Range Retrieval No-error Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.1974)
       desc="Server Force Update Control (Active Directory)"
@@ -133,7 +133,7 @@ ldapsearch \
       desc="Server Input DN Control (Active Directory)"
       ;;
     1.3.6.1.1.8)
-      desc="Cancel Operation (RFC 3909)"
+      desc="Cancel Operation Extension (RFC 3909)"
       ;;
     1.3.6.1.1.12)
       desc="Assertion Control (RFC 4528)"
@@ -151,10 +151,10 @@ ldapsearch \
       desc="Modify-Increment Feature (RFC 4525)"
       ;;
     1.3.6.1.1.21.1)
-      desc="Start Transaction Extended Request (RFC 5805)"
+      desc="Start Transaction Extended Request Extension (RFC 5805)"
       ;;
     1.3.6.1.1.21.3)
-      desc="End Transaction Extended Request (RFC 5805)"
+      desc="End Transaction Extended Request Extension (RFC 5805)"
       ;;
     1.3.6.1.4.1.42.2.27.8.5.1)
       desc="Password Policy Control (IETF draft, OpenLDAP slapo-ppolicy(5))"
@@ -163,37 +163,37 @@ ldapsearch \
       desc="Account Usable Request and Response Control (Sun)"
       ;;
     1.3.6.1.4.1.1466.101.119.1)
-      desc="Dynamic Refresh (RFC 2589)"
+      desc="Dynamic Refresh Extension (RFC 2589)"
       ;;
     1.3.6.1.4.1.1466.20037)
-      desc="Start TLS (RFC 2830, RFC 4511, RFC 4513)"
+      desc="Start TLS Extension (RFC 2830, RFC 4511, RFC 4513)"
       ;;
     1.3.6.1.4.1.4203.1.5.1)
       desc="All Operational Attributes Feature (RFC 3673)"
       ;;
     1.3.6.1.4.1.4203.1.5.2)
-      desc="OC AD Lists (RFC 4529)"
+      desc="OC AD Lists Feature (RFC 4529)"
       ;;
     1.3.6.1.4.1.4203.1.5.3)
-      desc="True/False filters (RFC 4526)"
+      desc="True/False filters Feature (RFC 4526)"
       ;;
     1.3.6.1.4.1.4203.1.5.4)
-      desc="Language Tag Options (RFC 3866)"
+      desc="Language Tag Options Feature (RFC 3866)"
       ;;
     1.3.6.1.4.1.4203.1.5.5)
-      desc="Language Range Options (RFC 3866)"
+      desc="Language Range Options Feature (RFC 3866)"
       ;;
     1.3.6.1.4.1.4203.1.9.1.1)
       desc="LDAP Content Synchronization Control (RFC 4533, OpenLDAP slapo-syncprov(5))"
       ;;
     1.3.6.1.4.1.4203.1.10.1)
-      desc="Subentries (RFC 3672)"
+      desc="Subentries Control (RFC 3672)"
       ;;
     1.3.6.1.4.1.4203.1.11.1)
-      desc="Modify Password (RFC 3062)"
+      desc="Modify Password Extension (RFC 3062)"
       ;;
     1.3.6.1.4.1.4203.1.11.3)
-      desc="Who am I? (RFC 4532)"
+      desc="Who am I? Extension (RFC 4532)"
       ;;
     2.16.840.1.113730.3.4.2)
       desc="Manage DSA IT Control (RFC 3296)"
@@ -205,10 +205,10 @@ ldapsearch \
       desc="Password Expiring LDAPv3 Control (Netscape)"
       ;;
     2.16.840.1.113730.3.4.9)
-      desc="Virtual List View (VLV) Request (RFC 2891, OpenLDAP slapo-sssvlv(5))"
+      desc="Virtual List View (VLV) Request Control (RFC 2891, OpenLDAP slapo-sssvlv(5))"
       ;;
     2.16.840.1.113730.3.4.10)
-      desc="Virtual List View (VLV) Response (RFC 2891, OpenLDAP slapo-sssvlv(5))"
+      desc="Virtual List View (VLV) Response Control (RFC 2891, OpenLDAP slapo-sssvlv(5))"
       ;;
     2.16.840.1.113730.3.4.18)
       desc="Proxy Authorization Control (RFC 4370)"
