@@ -51,7 +51,7 @@ ldapsearch \
   desc=""
 
   case "$attr" in
-  supported*:)
+  supportedControl:|supportedExtension:|supportedFeatures:)
     desc="Unknown: $attr $value"
     case "$value" in
     1.2.826.0.1.3344810.2.3)
