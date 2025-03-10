@@ -69,7 +69,7 @@ def main(argv):
     for db_file in argv:
         db_size, db_free = db_sizes(db_file)
         db_size_total += db_size
-        db_free_total += db_free 
+        db_free_total += db_free
         print(format_sizes(db_file, db_size, db_free), end='')
 
     print(format_sizes('Total', db_size_total, db_free_total), end='')
