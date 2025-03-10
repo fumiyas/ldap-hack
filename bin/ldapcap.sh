@@ -58,79 +58,79 @@ ldapsearch \
       desc="Matched Values Control (RFC 3876)"
       ;;
     1.2.840.113556.1.4.319)
-      desc="Paged search Control (RFC 2696)"
+      desc="Simple Paged Results Control (RFC 2696)"
       ;;
     1.2.840.113556.1.4.417)
-      desc="Show deleted Control"
+      desc="Show deleted Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.473)
-      desc="Sort Request (RFC 2891)"
+      desc="Server-Side Sort Request Control (RFC 2891)"
       ;;
     1.2.840.113556.1.4.474)
-      desc="Sort Response (RFC 2891)"
+      desc="Server-Side Sort Response Control (RFC 2891)"
       ;;
     1.2.840.113556.1.4.521)
-      desc="Cross-domain move Control"
+      desc="Cross-domain move Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.528)
-      desc="Server search notification Control"
+      desc="Server search notification Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.529)
-      desc="Extended DN Control"
+      desc="Extended DN Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.619)
-      desc="Lazy commit Control"
+      desc="Lazy commit Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.801)
-      desc="Security descriptor flags Control"
+      desc="Security descriptor flags Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.802)
-      desc="Server range option"
+      desc="Server range option Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.805)
-      desc="Tree delete Control"
+      desc="Tree delete Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.841)
       desc="Directory synchronization Control (IETF draft, Active Directory)"
       ;;
     1.2.840.113556.1.4.970)
-      desc="Get stats Control"
+      desc="Get stats Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.1338)
-      desc="Verify name Control"
+      desc="Verify name Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.1339)
-      desc="Domain scope Control"
+      desc="Domain scope Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.1340)
-      desc="Search options Control"
+      desc="Search options Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.1341)
-      desc="SERVER_RODC_DCPROMO"
+      desc="RODC DCPROMO Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.1413)
-      desc="Permissive modify Control"
+      desc="Permissive modify Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.1504)
-      desc="Attribute scoped query Control"
+      desc="Attribute scoped query Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.1781)
-      desc="Fast concurrent bind extended operation"
+      desc="Fast concurrent bind extended operation (Active Directory)"
       ;;
     1.2.840.113556.1.4.1852)
-      desc="Server Quota Control"
+      desc="Server Quota Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.1907)
-      desc="Server Shutdown Notify"
+      desc="Server Shutdown Notify (Active Directory)"
       ;;
     1.2.840.113556.1.4.1948)
-      desc="Server Range Retrieval No-error"
+      desc="Server Range Retrieval No-error (Active Directory)"
       ;;
     1.2.840.113556.1.4.1974)
-      desc="Server Force Update"
+      desc="Server Force Update Control (Active Directory)"
       ;;
     1.2.840.113556.1.4.2026)
-      desc="Server Input DN"
+      desc="Server Input DN Control (Active Directory)"
       ;;
     1.3.6.1.1.8)
       desc="Cancel Operation (RFC 3909)"
@@ -205,10 +205,10 @@ ldapsearch \
       desc="Password Expiring LDAPv3 Control (Netscape)"
       ;;
     2.16.840.1.113730.3.4.9)
-      desc="Virtual List View (VLV) Request"
+      desc="Virtual List View (VLV) Request (RFC 2891, OpenLDAP slapo-sssvlv(5))"
       ;;
     2.16.840.1.113730.3.4.10)
-      desc="Virtual List View (VLV) Response"
+      desc="Virtual List View (VLV) Response (RFC 2891, OpenLDAP slapo-sssvlv(5))"
       ;;
     2.16.840.1.113730.3.4.18)
       desc="Proxy Authorization Control (RFC 4370)"
