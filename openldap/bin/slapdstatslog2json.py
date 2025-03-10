@@ -132,9 +132,13 @@ error_text_by_n = {
 }
 
 re_stats_line = re.compile(
+    r'('
     r'(?P<month_abbr>[A-Z][a-z][a-z])'
     r' (?P<month_day>[\d ]\d)'
     r' (?P<time>(?P<hour>\d\d):(?P<minute>\d\d):(?P<second>\d\d))'
+    r'|'
+    r'(?P<datetime>\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d+[-+]\d\d:\d\d)'
+    r')'
     r' (?P<hostname>[\w\-.]+)'
     r' [\w\-]+\[(?P<pid>\d+)\]:'
     r' conn=(?P<conn_id>\d+)'
@@ -331,18 +335,21 @@ class Operation():
         if result is not None:
             self.result.update(result)
 
-
 def main(argv):
     line_n = 0
 
     ## Guess log year (standard syslog has no year in timestamp)
-    year = None
     for firstline in sys.stdin:
         m = re_stats_line.match(firstline)
         if m is None:
             line_n += 1
             continue
 
+        if m.group('datetime'):
+            ## ISO 8601 date and time format
+            break
+
+        ## Legacy syslog date and time format (no year)
         dt_now = datetime.datetime.now()
         year = dt_now.year
         month = month_by_abbr[m.group('month_abbr')]
@@ -354,8 +361,7 @@ def main(argv):
         if dt > dt_now:
             year = year - 1
         break
-
-    if year is None:
+    else:
         ## No stats log
         return 0
 
@@ -373,12 +379,17 @@ def main(argv):
         conn = conn_by_conn_id[conn_id]
         conn.line_n = line_n
 
-        month = month_by_abbr[m.group('month_abbr')]
-        mday = int(m.group('month_day'))
-        hour = int(m.group('hour'))
-        minute = int(m.group('minute'))
-        second = int(m.group('second'))
-        conn.datetime = datetime.datetime(year, month, mday, hour, minute, second, 0)
+        if m.group('datetime'):
+            ## ISO 8601 date and time format
+            conn.datetime = datetime.datetime.fromisoformat(m.group('datetime'))
+        else:
+            ## Legacy syslog date and time format (no year)
+            month = month_by_abbr[m.group('month_abbr')]
+            mday = int(m.group('month_day'))
+            hour = int(m.group('hour'))
+            minute = int(m.group('minute'))
+            second = int(m.group('second'))
+            conn.datetime = datetime.datetime(year, month, mday, hour, minute, second, 0)
 
         chunk = m.group('chunk')
         if m.group('what') == 'fd':
