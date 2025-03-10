@@ -134,14 +134,14 @@ error_text_by_n = {
 re_stats_line = re.compile(
     r'('
     r'(?P<month_abbr>[A-Z][a-z][a-z])'
-    r' (?P<month_day>[\d ]\d)'
-    r' (?P<time>(?P<hour>\d\d):(?P<minute>\d\d):(?P<second>\d\d))'
+    r' (?P<month_day>[ 0-3][0-9])'
+    r' (?P<time>(?P<hour>[0-2][0-9]):(?P<minute>[0-5][0-9]):(?P<second>[0-6][0-9]))'
     r'|'
-    r'(?P<datetime>\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d+[-+]\d\d:\d\d)'
+    r'(?P<datetime>[0-9]{4}-[01][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-6][0-9]\.[0-9]+[-+][01][0-9]:[0-9][0-9])'
     r')'
     r' (?P<hostname>[\w\-.]+)'
-    r' [\w\-]+\[(?P<pid>\d+)\]:'
-    r' conn=(?P<conn_id>\d+)'
+    r' [\w\-]+\[(?P<pid>[0-9]+)\]:'
+    r' conn=(?P<conn_id>[0-9]+)'
     r' (?P<what>fd|op)=(?P<id>[0-9]+)'
     r' (?P<chunk>.*)'
     '$'
@@ -150,7 +150,7 @@ re_stats_line = re.compile(
 re_bind_method = re.compile(
     r'BIND'
     r' dn="(?P<dn>[^"]*)"'
-    r' method=(?P<method_n>\d+)'
+    r' method=(?P<method_n>[0-9]+)'
     '$'
 )
 re_bind_authcid = re.compile(
@@ -163,8 +163,8 @@ re_bind_mech = re.compile(
     r'BIND'
     r' (dn="(?P<dn>[^"]*)"|anonymous)'
     r' mech=(?P<mech>[\w\-]+)'
-    r'( (bind|sasl)_ssf=(?P<bind_ssf>\d+))?'
-    r' ssf=(?P<ssf>\d+)'
+    r'( (bind|sasl)_ssf=(?P<bind_ssf>[0-9]+))?'
+    r' ssf=(?P<ssf>[0-9]+)'
     '$'
 )
 
@@ -176,8 +176,8 @@ re_whoami = re.compile(
 re_search_base = re.compile(
     r'SRCH'
     r' base="(?P<base>[^"]*)"'
-    r' scope=(?P<scope_n>\d+)'
-    r' deref=(?P<deref_n>\d+)'
+    r' scope=(?P<scope_n>[0-9]+)'
+    r' deref=(?P<deref_n>[0-9]+)'
     r' filter="(?P<filter>.*)"'
     '$'
 )
@@ -197,21 +197,21 @@ re_modify_dn = re.compile(
 
 re_result = re.compile(
     r'RESULT'
-    r'( tag=(?P<tag>\d+))?'
+    r'( tag=(?P<tag>[0-9]+))?'
     r'( oid=(?P<oid>\W*))?'
-    r' err=(?P<error>\d+)'
-    r'( qtime=(?P<qtime>\d+\.\d+))?'
-    r'( etime=(?P<etime>\d+\.\d+))?'
+    r' err=(?P<error>[0-9]+)'
+    r'( qtime=(?P<qtime>[0-9]+\.[0-9]+))?'
+    r'( etime=(?P<etime>[0-9]+\.[0-9]+))?'
     r' text=(?P<text>.*)'
     '$'
 )
 re_search_result = re.compile(
     r'SEARCH RESULT'
-    r' tag=(?P<tag>\d+)'
-    r' err=(?P<error>\d+)'
-    r'( qtime=(?P<qtime>\d+\.\d+))?'
-    r'( etime=(?P<etime>\d+\.\d+))?'
-    r' nentries=(?P<nentries>\d+)'
+    r' tag=(?P<tag>[0-9]+)'
+    r' err=(?P<error>[0-9]+)'
+    r'( qtime=(?P<qtime>[0-9]+\.[0-9]+))?'
+    r'( etime=(?P<etime>[0-9]+\.[0-9]+))?'
+    r' nentries=(?P<nentries>[0-9]+)'
     r' text=(?P<text>.*)'
     '$'
 )
