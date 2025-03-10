@@ -20,30 +20,22 @@ set -u
 set -e
 
 if [[ ${1-} == @(-h|--help) ]]; then
-  echo "Usage: $0 [URL [ldapsearch(1) options ...]]"
+  echo "Usage: $0 [ldapsearch(1) options ...]"
   exit 0
 fi
 
 ldap_opts=()
-
-if [[ $# -gt 0 ]]; then
-  ldap_opts+=(-H "$1")
-  shift
-else
-  ldap_opts+=(-H ldapi:///)
-fi
-
 if [[ $# -gt 0 ]]; then
   ldap_opts+=("$@")
 else
-  ldap_opts+=(-x)
+  ldap_opts+=(-H ldapi:/// -x)
 fi
 
 ldapsearch \
+  "${ldap_opts[@]}" \
   -LLL \
   -b '' \
   -s base \
-  "${ldap_opts[@]}" \
   'objectclass=*' \
   '*' \
   '+' \
