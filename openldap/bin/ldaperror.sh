@@ -8,24 +8,30 @@
 
 set -u
 
+##  Path to OpenLDAP ldap.h
 ldap_h="${LDAPERROR_LDAP_H:-/usr/include/ldap.h}"
 
 data_latest() {
-  # shellcheck disable=SC3043 # In POSIX sh, 'local' is undefined
-  local name hex
-
-  ## FIXME: Support `#define LDAP_XXX_XXX LDAP_YYY_YYY`
   expand -- "$ldap_h" \
   |sed \
     -E \
     -n \
-    '/LDAP_SUCCESS/,/API Error Codes/s/^#define +(LDAP_[_A-Z0-9]+) +0x/\1 0x/p' \
-  |while IFS=' ' read -r name hex _; do
+    '/LDAP_SUCCESS/,/API Error Codes/s/^#define +(LDAP_[_A-Z0-9]+) +([_0-9A-Za-z]+).*/\1 \2/p' \
+  |while IFS=' ' read -r name hex; do
+    if [ -z "${hex##LDAP_*}" ]; then
+      eval hex='"$'"$hex"'"'
+    else
+      eval "$name"='"$hex"'
+    fi
     echo "$(printf '%d' "$hex") $hex $name"
   done
 }
 
 if [ "${1-}" = "--update-data" ]; then
+  if [ ! -s "$ldap_h" ]; then
+    echo "$0: ERROR: File not found: $ldap_h" 1>&2
+    exit 2
+  fi
   sed -i "/^cat <<'__DATA__'"'$/,$d' "$0"
   {
     echo "cat <<'__DATA__'"
@@ -62,7 +68,9 @@ cat <<'__DATA__'
 5 0x05 LDAP_COMPARE_FALSE
 6 0x06 LDAP_COMPARE_TRUE
 7 0x07 LDAP_AUTH_METHOD_NOT_SUPPORTED
+7 0x07 LDAP_STRONG_AUTH_NOT_SUPPORTED
 8 0x08 LDAP_STRONG_AUTH_REQUIRED
+8 0x08 LDAP_STRONGER_AUTH_REQUIRED
 9 0x09 LDAP_PARTIAL_RESULTS
 10 0x0a LDAP_REFERRAL
 11 0x0b LDAP_ADMINLIMIT_EXCEEDED
