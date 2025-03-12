@@ -54,7 +54,7 @@ case "$key" in
   ;;
 esac
 
-sed -e "1,/^cat <<'__DATA__'"'$/d' -e '$d' <"$0"|grep -i "$re"
+sed -e "1,/^cat <<'__DATA__'"'$/d' -e '$d' <"$0"|grep -i -- "$re"
 
 exit $?
 
