@@ -1,26 +1,121 @@
 #!/bin/sh
 ##
 ##  ldaperror.sh で、LDAP のエラーコードをすばやくしらべる!
-##  Copyright (c) 2022 SATOH Fumiyasu @ OSSTech Corp., Japan
 ##
-##  License: GNU General Public License version 3
-##
-##  Requirements:
-##  * sed(1) with extended regular expressions support (-E option)
-##  * gawk(1)
-##  * /usr/include/ldap.h from OpenLDAP
-##      * libldap-dev package in Debian and variants
-##      * openldap-devel package in RHEL and variants
+##  SPDX-FileCopyrightText: 2022-2025 SATOH Fumiyasu @ OSSTech Corp., Japan
+##  SPDX-License-Identifier: GPL-3.0-or-later
 ##
 
 set -u
 
-sed \
-  -E \
-  -n \
-  '/LDAP_SUCCESS/,/API Error Codes/s/^#define\s+([_A-Z0-9]+)\s+/\1 /p' \
-  /usr/include/ldap.h \
-|gawk \
-  -v err="${1-}" \
-  '{ d=strtonum($2); if (err == "" || $2 == err || d == err) { print $2, d, $1} }' \
-;
+ldap_h="${LDAPERROR_LDAP_H:-/usr/include/ldap.h}"
+
+data_latest() {
+  # shellcheck disable=SC3043 # In POSIX sh, 'local' is undefined
+  local name hex
+
+  ## FIXME: Support `#define LDAP_XXX_XXX LDAP_YYY_YYY`
+  expand -- "$ldap_h" \
+  |sed \
+    -E \
+    -n \
+    '/LDAP_SUCCESS/,/API Error Codes/s/^#define +(LDAP_[_A-Z0-9]+) +0x/\1 0x/p' \
+  |while IFS=' ' read -r name hex _; do
+    echo "$(printf '%d' "$hex") $hex $name"
+  done
+}
+
+if [ "${1-}" = "--update-data" ]; then
+  sed -i "/^cat <<'__DATA__'"'$/,$d' "$0"
+  {
+    echo "cat <<'__DATA__'"
+    data_latest
+    echo '__DATA__'
+  } >> "$0"
+  exit 0
+fi
+
+key="$*"
+case "$key" in
+0x*)
+  re=" $key "
+  ;;
+*[!0-9]*)
+  re="$key"
+  ;;
+*)
+  re="^$key"
+  ;;
+esac
+
+sed -e "1,/^cat <<'__DATA__'"'$/d' -e '$d' <"$0"|grep -i "$re"
+
+exit $?
+
+# shellcheck disable=SC2317 # Command appears to be unreachable
+cat <<'__DATA__'
+0 0x00 LDAP_SUCCESS
+1 0x01 LDAP_OPERATIONS_ERROR
+2 0x02 LDAP_PROTOCOL_ERROR
+3 0x03 LDAP_TIMELIMIT_EXCEEDED
+4 0x04 LDAP_SIZELIMIT_EXCEEDED
+5 0x05 LDAP_COMPARE_FALSE
+6 0x06 LDAP_COMPARE_TRUE
+7 0x07 LDAP_AUTH_METHOD_NOT_SUPPORTED
+8 0x08 LDAP_STRONG_AUTH_REQUIRED
+9 0x09 LDAP_PARTIAL_RESULTS
+10 0x0a LDAP_REFERRAL
+11 0x0b LDAP_ADMINLIMIT_EXCEEDED
+12 0x0c LDAP_UNAVAILABLE_CRITICAL_EXTENSION
+13 0x0d LDAP_CONFIDENTIALITY_REQUIRED
+14 0x0e LDAP_SASL_BIND_IN_PROGRESS
+16 0x10 LDAP_NO_SUCH_ATTRIBUTE
+17 0x11 LDAP_UNDEFINED_TYPE
+18 0x12 LDAP_INAPPROPRIATE_MATCHING
+19 0x13 LDAP_CONSTRAINT_VIOLATION
+20 0x14 LDAP_TYPE_OR_VALUE_EXISTS
+21 0x15 LDAP_INVALID_SYNTAX
+32 0x20 LDAP_NO_SUCH_OBJECT
+33 0x21 LDAP_ALIAS_PROBLEM
+34 0x22 LDAP_INVALID_DN_SYNTAX
+35 0x23 LDAP_IS_LEAF
+36 0x24 LDAP_ALIAS_DEREF_PROBLEM
+47 0x2F LDAP_X_PROXY_AUTHZ_FAILURE
+48 0x30 LDAP_INAPPROPRIATE_AUTH
+49 0x31 LDAP_INVALID_CREDENTIALS
+50 0x32 LDAP_INSUFFICIENT_ACCESS
+51 0x33 LDAP_BUSY
+52 0x34 LDAP_UNAVAILABLE
+53 0x35 LDAP_UNWILLING_TO_PERFORM
+54 0x36 LDAP_LOOP_DETECT
+64 0x40 LDAP_NAMING_VIOLATION
+65 0x41 LDAP_OBJECT_CLASS_VIOLATION
+66 0x42 LDAP_NOT_ALLOWED_ON_NONLEAF
+67 0x43 LDAP_NOT_ALLOWED_ON_RDN
+68 0x44 LDAP_ALREADY_EXISTS
+69 0x45 LDAP_NO_OBJECT_CLASS_MODS
+70 0x46 LDAP_RESULTS_TOO_LARGE
+71 0x47 LDAP_AFFECTS_MULTIPLE_DSAS
+76 0x4C LDAP_VLV_ERROR
+80 0x50 LDAP_OTHER
+113 0x71 LDAP_CUP_RESOURCES_EXHAUSTED
+114 0x72 LDAP_CUP_SECURITY_VIOLATION
+115 0x73 LDAP_CUP_INVALID_DATA
+116 0x74 LDAP_CUP_UNSUPPORTED_SCHEME
+117 0x75 LDAP_CUP_RELOAD_REQUIRED
+118 0x76 LDAP_CANCELLED
+119 0x77 LDAP_NO_SUCH_OPERATION
+120 0x78 LDAP_TOO_LATE
+121 0x79 LDAP_CANNOT_CANCEL
+122 0x7A LDAP_ASSERTION_FAILED
+123 0x7B LDAP_PROXIED_AUTHORIZATION_DENIED
+4096 0x1000 LDAP_SYNC_REFRESH_REQUIRED
+16640 0x4100 LDAP_X_SYNC_REFRESH_REQUIRED
+16655 0x410f LDAP_X_ASSERTION_FAILED
+16654 0x410e LDAP_X_NO_OPERATION
+16656 0x4110 LDAP_X_NO_REFERRALS_FOUND
+16657 0x4111 LDAP_X_CANNOT_CHAIN
+16658 0x4112 LDAP_X_INVALIDREFERENCE
+16672 0x4120 LDAP_TXN_SPECIFY_OKAY
+16673 0x4121 LDAP_TXN_ID_INVALID
+__DATA__
