@@ -7,8 +7,6 @@
 ## SPDX-License-Identifier: GPL-3.0-or-later
 ##
 
-## FIXME: Support OpenLDAP 2.5+
-
 import logging
 import sys
 import re
