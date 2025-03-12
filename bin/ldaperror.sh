@@ -27,7 +27,18 @@ data_latest() {
   done
 }
 
-if [ "${1-}" = "--update-data" ]; then
+case "${1-}" in
+-h|--help)
+  cmd="${0##*/}"
+  echo "Usage: $cmd ERROR"
+  echo
+  echo "Examples:"
+  echo "  $cmd 49"
+  echo "  $cmd 0x20"
+  echo "  $cmd invalid"
+  exit 0
+  ;;
+--update-data)
   if [ ! -s "$ldap_h" ]; then
     echo "$0: ERROR: File not found: $ldap_h" 1>&2
     exit 2
@@ -39,7 +50,8 @@ if [ "${1-}" = "--update-data" ]; then
     echo '__DATA__'
   } >> "$0"
   exit 0
-fi
+  ;;
+esac
 
 key="$*"
 case "$key" in
