@@ -333,6 +333,7 @@ class Operation():
         if result is not None:
             self.result.update(result)
 
+
 def main(argv):
     line_n = 0
 
