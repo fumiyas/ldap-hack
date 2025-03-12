@@ -17,6 +17,8 @@
 set -u
 set -e
 
+ldapsearch="${LDAPCAP_LDAPSEARCH:-/usr/bin/ldapsearch}"
+
 if [[ ${1-} == @(-h|--help) ]]; then
   echo "Usage: $0 [ldapsearch(1) options ...]"
   exit 0
@@ -29,7 +31,7 @@ else
   ldap_opts+=(-H ldapi:/// -x)
 fi
 
-ldapsearch \
+"$ldapsearch" \
   "${ldap_opts[@]}" \
   -LLL \
   -b '' \
