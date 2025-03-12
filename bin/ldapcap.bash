@@ -36,6 +36,7 @@ fi
   -LLL \
   -b '' \
   -s base \
+  -o ldif-wrap=no \
   'objectclass=*' \
   '*' \
   '+' \
