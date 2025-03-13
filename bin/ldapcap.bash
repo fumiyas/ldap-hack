@@ -14,13 +14,25 @@
 ## https://backstage.forgerock.com/docs/ds/7/ldap-reference/controls.html
 ## Directory Services 7 > LDAP Reference > Supported LDAP Extended Operations
 ## https://backstage.forgerock.com/docs/ds/7/ldap-reference/extended-ops.html
+
 set -u
 set -e
+
+ldif_unwrap() {
+  sed \
+    -n \
+    -e '1{ h; $!d; }' \
+    -e '${ x; s/\n //g; p; }' \
+    -e '/^ /{ H; d; }' \
+    -e '/^ /!{ x; s/\n //g; p; }' \
+  ;
+}
 
 ldapsearch="${LDAPCAP_LDAPSEARCH:-/usr/bin/ldapsearch}"
 
 if [[ ${1-} == @(-h|--help) ]]; then
   echo "Usage: $0 [ldapsearch(1) options ...]"
+  echo "Usage: $0 - < rootdse.ldif"
   exit 0
 fi
 
@@ -31,15 +43,20 @@ else
   ldap_opts+=(-H ldapi:/// -x)
 fi
 
-"$ldapsearch" \
-  "${ldap_opts[@]}" \
-  -LLL \
-  -b '' \
-  -s base \
-  -o ldif-wrap=no \
-  'objectclass=*' \
-  '*' \
-  '+' \
+if [[ ${1-} == - ]]; then
+  ldif_unwrap
+else
+  "$ldapsearch" \
+    "${ldap_opts[@]}" \
+    -LLL \
+    -b '' \
+    -s base \
+    -o ldif-wrap=no \
+    'objectclass=*' \
+    '*' \
+    '+' \
+  ;
+fi \
 |while read -r attr value; do
   desc=""
 
