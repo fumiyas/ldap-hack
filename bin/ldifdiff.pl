@@ -278,7 +278,7 @@ my %newentry_decode = ();
 (my $modfh, my $modfile) = tempfile();
 
 open( my $oldin, $oldfile ) or die "Couldn't read $oldfile: $!";
-open( my $newin, $newfile ) or die "Couldn't read $oldfile: $!";
+open( my $newin, $newfile ) or die "Couldn't read $newfile: $!";
 
 while(  (!eof( $oldin )) ||  (!eof( $newin )) ) {
 
