@@ -76,6 +76,8 @@ if [[ "$pubkey_digest1" != "$pubkey_digest2" ]]; then
 fi
 
 ## FIXME: If slapd is not running? (or no slapi:/// socket)
+## FIXME: Support olcTLSCertificate, olcTLSCertificateKey (binary in DIT)
+## FIXME: Support oldBkLloadTLS...
 
 run_always ldapsearch \
   "${ldap_command_options[@]}" \
