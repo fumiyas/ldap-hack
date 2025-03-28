@@ -6,12 +6,7 @@ cd "${0%/*}" || exit $?
 
 export PATH="..:$PATH"
 
-ldifunwrap.pl() {
-  perl -pe 'BEGIN {$/=""} s/\n //gms'
-}
-
-for i in awk sed pl; do
-  ldifunwrap_cmd="ldifunwrap.$i"
+for ldifunwrap_cmd in ldifunwrap.awk ldifunwrap.sed ldifunwrap.pl; do
   for a_ldif in */one-entry-*.ldif; do
     for b_ldif in */one-entry-*.ldif; do
       for ldifdiff_cmd in ldifdiff.py ldifdiff.pl; do
