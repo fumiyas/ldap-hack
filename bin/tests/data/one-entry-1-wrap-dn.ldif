@@ -1,6 +1,6 @@
 # This is a comment. This is a comment too. Blah, Blah ...
-dn: cn=test,ou=Users,
+dn: cn=user1,ou=Users,
  dc=example,dc=jp
-cn: test
+cn: user1
 givenName;lang-ja:: 44Gq44Gq44GX
-test: foobar: qux
+xyzXyz: foobar: qux

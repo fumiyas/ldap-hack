@@ -1,7 +1,7 @@
 # This is a comment. 
  This is a comment too.
   Blah, Blah ...
-dn: cn=test,ou=Users,dc=example,dc=jp
-cn: test
+dn: cn=user1,ou=Users,dc=example,dc=jp
+cn: user1
 givenName;lang-ja:: 44Gq44Gq44GX
-test: foobar: qux
+xyzXyz: foobar: qux
