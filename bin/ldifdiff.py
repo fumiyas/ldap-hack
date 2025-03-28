@@ -39,7 +39,7 @@ def entry(ldif_in):
     skipped = False
 
     for line in ldif_in:
-        line = line.rstrip('\n')
+        line = line.rstrip('\r\n')
         if line == '':
             if buf:
                 break
