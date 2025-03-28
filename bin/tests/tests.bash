@@ -14,8 +14,8 @@ for ldifunwrap_cmd in ldifunwrap.awk ldifunwrap.sed ldifunwrap.pl; do
         "$ldifunwrap_cmd" \
           <"$a_ldif" \
         |"$ldifdiff_cmd" \
-          "$b_ldif" \
           /dev/stdin \
+          "$b_ldif" \
         ;
         "$ldifunwrap_cmd" \
           < <(
@@ -24,12 +24,12 @@ for ldifunwrap_cmd in ldifunwrap.awk ldifunwrap.sed ldifunwrap.pl; do
             sed 's/^dn:[^,]*/&2/' "$b_ldif"
           ) \
         |"$ldifdiff_cmd" \
+          /dev/stdin \
           <(
             sed 's/^dn:[^,]*/&2/' "$b_ldif"
             echo
             cat "$a_ldif"
           ) \
-          /dev/stdin \
         ;
       done
     done
