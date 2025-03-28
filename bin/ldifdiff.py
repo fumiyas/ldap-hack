@@ -3,7 +3,7 @@
 #
 # ldifdiff: Compare two ldif files
 #
-# SPDX-FileCopyrightText: 2023 SATOH Fumiyasu @ OSSTech Corp., Japan
+# SPDX-FileCopyrightText: 2023-2025 SATOH Fumiyasu @ OSSTech Corp., Japan
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # Ported from ldif-diff implemented in Perl
@@ -11,6 +11,11 @@
 #   GPL copyright 2004 by VA Linux Systems Japan, K.K
 #   Writen by Masato Taruishi <taru@valinux.co.jp>
 #
+# /// script
+# requires-python = ">=3.6"
+# dependencies = [
+# ]
+# ///
 
 ## FIXME: Replace debug() with logging module
 
