@@ -32,7 +32,7 @@ def debug(msg):
         print(msg, file=sys.stderr)
 
 
-def entry(ldif_in):
+def entry_read(ldif_in):
     buf = ""
     dn = None
     key = ""
@@ -82,7 +82,7 @@ def entry(ldif_in):
     }
 
 
-def decode(buf):
+def entry_decode(buf):
     dec = []
     for kv in buf.split('\n'):
         m = kv_b64_re.search(kv)
@@ -97,58 +97,54 @@ def decode(buf):
     return "\n".join(dec)
 
 
+def entry2attrs(entry):
+    attrs = {}
+
+    if not entry:
+        return attrs
+
+    for kv in entry.split('\n'):
+        debug(f"entry2attrs: {kv}")
+        m = kv_re.search(kv)
+        if m:
+            key = m.group('key')
+            if key in attrs:
+                attrs[key] += kv + '\n'
+            else:
+                attrs[key] = kv + '\n'
+        else:
+            raise ValueError(f"Invalid line in entry: {kv}")
+
+    return attrs
+
+
 def modify(oldentry, newentry, oldentry_decode, newentry_decode, dn, modfh):
     debug(f"different: {dn}")
-
-    oldattr = {}
-    oldattr_decode = {}
-    newattr = {}
-    newattr_decode = {}
+    debug(f"oldentry: {oldentry!r}")
+    debug(f"newentry: {newentry!r}")
 
     print(f"dn: {dn}", file=modfh)
     print("changetype: modify", file=modfh)
 
-    for kv in oldentry.split('\n'):
-        debug(f"adding old attr: {kv} for {dn}")
-        m = kv_re.search(kv)
-        if m:
-            key = m.group('key')
-            if key not in oldattr:
-                oldattr[key] = ''
-            oldattr[key] += kv + '\n'
-        else:
-            raise ValueError(f"Unsupported LDIF format in old data: {kv}")
+    try:
+        oldattr = entry2attrs(oldentry)
+    except ValueError as e:
+        raise ValueError(f"Invalid data in old entry: {dn}") from e
 
-    for kv in oldentry_decode.split('\n'):
-        m = kv_re.search(kv)
-        if m:
-            key = m.group('key')
-            if key not in oldattr_decode:
-                oldattr_decode[key] = ''
-            oldattr_decode[key] += kv + '\n'
-        else:
-            raise ValueError(f"Unsupported LDIF format in old data: {kv}")
+    try:
+        oldattr_decode = entry2attrs(oldentry_decode)
+    except ValueError as e:
+        raise ValueError(f"Invalid data in old decoded entry: {dn}") from e
 
-    for kv in newentry.split('\n'):
-        debug(f"adding new attr: {kv} for {dn}")
-        m = kv_re.search(kv)
-        if m:
-            key = m.group('key')
-            if key not in newattr:
-                newattr[key] = ''
-            newattr[key] += kv + '\n'
-        else:
-            raise ValueError(f"Unsupported LDIF format in new data: {kv}")
+    try:
+        newattr = entry2attrs(newentry)
+    except ValueError as e:
+        raise ValueError(f"Invalid data in new entry: {dn}") from e
 
-    for kv in newentry_decode.split('\n'):
-        m = kv_re.search(kv)
-        if m:
-            key = m.group('key')
-            if key not in newattr_decode:
-                newattr_decode[key] = ''
-            newattr_decode[key] += kv + '\n'
-        else:
-            raise ValueError(f"Unsupported LDIF format in new data: {kv}")
+    try:
+        newattr_decode = entry2attrs(newentry_decode)
+    except ValueError as e:
+        raise ValueError(f"Invalid data in new decoded entry: {dn}") from e
 
     for key in oldattr.keys():
         debug(f"checking attr: {key} for {dn}")
@@ -234,12 +230,12 @@ while True:
     odn = ""
     ndn = ""
 
-    oe = entry(oldin)
+    oe = entry_read(oldin)
     if oe:
         odn = oe['dn']
         oldentry[odn] = oe['entry']
 
-    ne = entry(newin)
+    ne = entry_read(newin)
     if ne:
         ndn = ne['dn']
         newentry[ndn] = ne['entry']
@@ -250,9 +246,9 @@ while True:
     if odn in newentry and odn in oldentry:
         debug(f'checking {odn}')
         if odn not in oldentry_decode:
-            oldentry_decode[odn] = decode(oldentry[odn])
+            oldentry_decode[odn] = entry_decode(oldentry[odn])
         if odn not in newentry_decode:
-            newentry_decode[odn] = decode(newentry[odn])
+            newentry_decode[odn] = entry_decode(newentry[odn])
 
         if newentry_decode[odn] != oldentry_decode[odn]:
             modify(oldentry[odn], newentry[odn], oldentry_decode[odn], newentry_decode[odn], odn, modfh)
@@ -267,9 +263,9 @@ while True:
     if ndn in newentry and ndn in oldentry:
         debug(f'checking {ndn}')
         if ndn not in oldentry_decode:
-            oldentry_decode[ndn] = decode(oldentry[ndn])
+            oldentry_decode[ndn] = entry_decode(oldentry[ndn])
         if ndn not in newentry_decode:
-            newentry_decode[ndn] = decode(newentry[ndn])
+            newentry_decode[ndn] = entry_decode(newentry[ndn])
 
         if newentry_decode[ndn] != oldentry_decode[ndn]:
             modify(oldentry[ndn], newentry[ndn], oldentry_decode[ndn], newentry_decode[ndn], ndn, modfh)
