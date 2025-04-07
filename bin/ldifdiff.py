@@ -47,9 +47,12 @@ def entry_read(ldif_in):
         line = line.rstrip('\r\n')
         if line == '':
             if buf:
+                ## End of entry
                 break
+            ## Skip heading empty lines
             continue
         if line[0] == '#':
+            ## Skip comments
             skipped = True
             continue
 
