@@ -1,0 +1,33 @@
+dn: cn=no-diff-1,ou=Users,dc=example,dc=jp
+objectClass: person
+cn: no-diff-1
+title: Title
+mail: no-diff-1@example.com
+
+dn: cn=no-diff-2-but-attrs-order,ou=Users,dc=example,dc=jp
+objectClass: person
+cn: no-diff-2-but-attrs-order
+title: Title
+mail: no-diff-2-but-attrs-order@example.com
+
+dn: cn=diff-attr-1,ou=Users,dc=example,dc=jp
+objectClass: person
+cn: diff-attr-1
+title: Title
+description: new-attr
+cn: cn-no-diff-but-order
+
+dn: cn=diff-attr-2,ou=Users,dc=example,dc=jp
+objectClass: person
+cn: diff-attr-2
+cn: removing-one-attr-from-multi-attrs
+title: Title
+mail: removing-one-attr@example.com
+mailForwardingAddress: removing-multi-attrs@example.jp
+mailForwardingAddress: removing-multi-attrs@example.net
+
+dn: cn=removing-entry,ou=Users,dc=example,dc=jp
+objectClass: person
+cn: removing
+title: Title
+mail: removing-entry@example.com

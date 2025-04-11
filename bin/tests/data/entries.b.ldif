@@ -1,0 +1,31 @@
+dn: cn=no-diff-1,ou=Users,dc=example,dc=jp
+objectClass: person
+cn: no-diff-1
+title: Title
+mail: no-diff-1@example.com
+
+dn: cn=no-diff-2-but-attrs-order,ou=Users,dc=example,dc=jp
+objectClass: person
+mail: no-diff-2-but-attrs-order@example.com
+title: Title
+cn: no-diff-2-but-attrs-order
+
+dn: cn=new-entry-1,ou=Users,dc=example,dc=jp
+objectClass: person
+cn: new-entry-1
+cn: multi-attrs-in-new-entry
+title: Title
+mail: new-entry-1@example.com
+
+dn: cn=diff-attr-1,ou=Users,dc=example,dc=jp
+objectClass: person
+cn: diff-attr-1
+title: Title
+mail: diff-attr-1@example.com
+
+dn: cn=diff-attr-2,ou=Users,dc=example,dc=jp
+objectClass: person
+cn: diff-attr-2
+title: Title
+mailForwardingAddress: new-multi-values-1@example.jp
+mailForwardingAddress: new-multi-values-2@example.net

@@ -72,6 +72,11 @@ use MIME::Base64;
 use Getopt::Long;
 use File::Temp qw/ tempfile /;
 
+my $test = $ENV{'LDIFDIFF_PERL_TEST'};
+if ($test) {
+    use Hash::Ordered;
+}
+
 my %exclude_attr = (
   "modifyTimestamp" => 1,
   "modifiersName" => 1,
@@ -182,10 +187,14 @@ sub modify {
   debug "[$oldentry_decode]\n";
   debug "[$newentry_decode]\n";
 
-  my %oldattr = ();
-  my %oldattr_decode = ();
-  my %newattr = ();
-  my %newattr_decode = ();
+  my %oldattr;
+  my %oldattr_decode;
+  my %newattr;
+  my %newattr_decode;
+  if ($test) {
+    tie %oldattr, "Hash::Ordered";
+    tie %newattr, "Hash::Ordered";
+  }
 
   print $modfh "dn: $dn\n";
 
