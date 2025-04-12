@@ -39,7 +39,6 @@ def debug(msg):
 
 def entry_read(ldif_in):
     buf = ""
-    dn = None
     key = ""
     skipped = False
 
@@ -60,29 +59,39 @@ def entry_read(ldif_in):
             if not skipped:
                 if not key:
                     raise ValueError(f"Wrapped line without attribute name found: {line}")
-                buf = buf + line[1:]
+                buf += line[1:]
         else:
             colon = line.find(':')
             if colon <= 0:
                 raise ValueError(f"Invalid attribute line (no colon `:`): {line}")
 
-            if dn is None and buf:
-                if buf[0:3] != 'dn:':
-                    raise ValueError(f"Invalid DN line: {buf}")
-                dn = buf[3:].lstrip(' ')
-                buf = ""
-
             key = line[0:colon]
-            if key in include_attrs or key not in exclude_attrs:
-                skipped = False
-                if buf:
-                    buf += '\n'
-                buf += line
-            else:
+            if target_attrs:
+                if key.lower() != 'dn' and key not in target_attrs:
+                    skipped = True
+                    continue
+            elif (
+                key not in include_attrs
+                and key in exclude_attrs
+            ):
                 skipped = True
+                continue
 
-    if dn is None:
+            skipped = False
+            if buf:
+                buf += '\n'
+            buf += line
+
+    if not buf:
         return None
+
+    if buf[0:3].lower() != 'dn:':
+        raise ValueError(f"No DN line in entry: {buf}")
+
+    lf = buf.find('\n')
+    ## FIXME: Support base64-encoded DN value
+    dn = buf[4:lf]
+    buf = buf[lf + 1:]
 
     return {
         'dn': dn,
@@ -206,6 +215,11 @@ args_parser.add_argument(
     'file2', metavar='FILE2',
     help='LDIF file 2',
 )
+args_parser.add_argument(
+    'target_attrs', metavar='ATTRIBUTE',
+    nargs='*',
+    help='Attribute name(s) to compare',
+)
 ## FIXME: Support multiple -i option
 args_parser.add_argument(
     '--include-attrs', '-i', metavar='NAME',
@@ -224,6 +238,8 @@ if args.include_attrs:
     include_attrs.update(args.include_attrs.split(','))
 if args.exclude_attrs:
     exclude_attrs.update(args.exclude_attrs.split(','))
+
+target_attrs = args.target_attrs
 
 oldin = open(args.file1)
 newin = open(args.file2)
