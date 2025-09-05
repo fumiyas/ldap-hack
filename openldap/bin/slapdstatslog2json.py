@@ -563,7 +563,6 @@ def main(argv):
             elif chunk.startswith('CMP '):
                 op.set_request('COMPARE')
 
-                op.request['attrs'] = chunk[10:].split(' ')
                 m = re_cmp.match(chunk)
                 if m is None:
                     logger.error(f'Invalid `CMP` line: {line_n}: {line}')
